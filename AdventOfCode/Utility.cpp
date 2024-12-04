@@ -36,3 +36,32 @@ std::vector<int> QuickSortInt(std::vector<int> nums)
 
 	return Final;
 }
+
+bool isAscendingOrder(std::vector<int> Sequence)
+{
+	int increment = 0;
+	for (int x = 1; x < Sequence.size(); x++)
+	{
+		if (Sequence[x] > Sequence[x - 1])
+		{
+			increment++;
+		}
+		else
+		{
+			increment--;
+		}
+
+		if (increment >= 2)
+		{
+			return true;
+			break;
+		}
+		else if (increment <= -2)
+		{
+			return false;
+			break;
+		}
+	}
+	return true;
+}
+

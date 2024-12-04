@@ -5,6 +5,10 @@
 #include <unordered_map>
 #include <string>
 #include <fstream>
+#include <sstream>
 #include "Utility.h"
 
-int DayOneSolution(std::string input);
+void DayOneSolution(std::string input);
+
+void DayTwoSolution(std::string input);
+bool CheckValidSequence(std::vector<int> Sequence, int& problemIndex, bool bisAscending, int ignoreElement);
