@@ -6,9 +6,12 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <regex>
 #include "Utility.h"
 
 void DayOneSolution(std::string input);
 
 void DayTwoSolution(std::string input);
 bool CheckValidSequence(std::vector<int> Sequence, int& problemIndex, bool bisAscending, int ignoreElement);
+
+void DayThreeSolution(std::string input);

@@ -80,6 +80,7 @@ void DayTwoSolution(std::string input)
 		}
 		sequences.push_back(s);
 	}
+	inputfile.close();
 
 	// can do this with divide and conqure but ill be lazy and use brute force since
 	// the size of the sequences are small
@@ -138,4 +139,54 @@ bool CheckValidSequence(std::vector<int> Sequence, int& problemIndex, bool bisAs
 	}
 
 	return true;
+}
+
+void DayThreeSolution(std::string input)
+{
+	int Total = 0;
+	std::string sinput = "";
+	std::regex mulReg("mul\\(([0-9]+),([0-9]+)\\)");
+	std::regex doDontReg(".*(do\\(\\)|don't\\(\\)).*");
+	std::smatch match, doDontMatch;
+	bool bDoAction = true;
+
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file " << input << "\n";
+		return;
+	}
+
+	std::string line;
+	while (std::getline(inputfile, line))
+	{
+		sinput += line;
+	}
+	inputfile.close();
+
+	std::string::const_iterator csearch = sinput.cbegin();
+
+	while (std::regex_search(csearch, sinput.cend(), match, mulReg))
+	{
+		std::string prefix = match.prefix();
+		std::regex_match(prefix, doDontMatch, doDontReg);
+		if (doDontMatch.size() > 0)
+		{
+			if (doDontMatch[doDontMatch.size() - 1] == "do()")
+			{
+				bDoAction = true;
+			}
+			else
+			{
+				bDoAction = false;
+			}
+		}
+		if (bDoAction)
+		{
+			Total += std::stoi(match[1]) * std::stoi(match[2]);
+		}
+		csearch = match.suffix().first;
+	}
+
+	std::cout << "Total multiplications is " << Total << "\n";
 }

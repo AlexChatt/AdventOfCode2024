@@ -7,4 +7,5 @@ int main()
 {
 	DayOneSolution("input1.txt");
 	DayTwoSolution("input2.txt");
+	DayThreeSolution("input3.txt");
 }
