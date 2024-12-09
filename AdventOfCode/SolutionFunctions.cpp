@@ -190,3 +190,144 @@ void DayThreeSolution(std::string input)
 
 	std::cout << "Total multiplications is " << Total << "\n";
 }
+
+void DayFourSolution(std::string input)
+{
+	int totalXmasCount = 0, totalMasCrossCount = 0;
+	std::vector<std::vector<char>> grid;
+	std::vector<std::pair<int, int>> charXPos;
+	std::vector<std::pair<int, int>> charAPos;
+
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file " << input << "\n";
+		return;
+	}
+
+	std::string line;
+	while (std::getline(inputfile, line))
+	{
+		std::vector<char> lineVec;
+		if (line.size() > 0)
+		{
+			for (int l = 0; l < line.size(); l++)
+			{
+				lineVec.push_back(line[l]);
+				if (line[l] == 'X')
+				{
+					charXPos.push_back(std::pair<int, int>(l, grid.size()));
+				}
+				if (line[l] == 'A')
+				{
+					charAPos.push_back(std::pair<int, int>(l, grid.size()));
+				}
+			}
+		}
+		grid.push_back(lineVec);
+	}
+	inputfile.close();
+
+
+	for (auto xLocation : charXPos)
+	{
+		totalXmasCount += GetXmasMatchesP1(grid, xLocation.first, xLocation.second);
+	}
+
+	std::cout << "Total number of 'XMAS' in grid is " << totalXmasCount << "\n";
+
+	for (auto aLocation : charAPos)
+	{
+		if (GetXmasMatchesP2(grid, aLocation.first, aLocation.second)) 
+		{ 
+			totalMasCrossCount++; 
+		}
+	}
+	std::cout << "Total number of Cross 'MAS' in grid is " << totalMasCrossCount << "\n";
+}
+
+int GetXmasMatchesP1(std::vector<std::vector<char>> grid, const int x, const int y)
+{
+	int matches = 0;
+	if (grid.size() == 0) { return matches; }
+
+	//Left
+	if (x - 3 >= 0 &&
+		grid[y][x-1] == 'M' && grid[y][x-2] == 'A' && grid[y][x-3] == 'S')
+	{
+		matches++;
+	}
+	//Right
+	if (x + 3 < grid[0].size() &&
+		grid[y][x+1] == 'M' && grid[y][x+2] == 'A' && grid[y][x+3] == 'S')
+	{
+		matches++;
+	}
+
+	//Up
+	if (y - 3 >= 0 &&
+		grid[y-1][x] == 'M' && grid[y-2][x] == 'A' && grid[y-3][x] == 'S')
+	{
+		matches++;
+	}
+	
+	//Down
+	if (y + 3 < grid.size() &&
+		grid[y + 1][x] == 'M' && grid[y + 2][x] == 'A' && grid[y + 3][x] == 'S')
+	{
+		matches++;
+	}
+
+	//diag up-left
+	if ((x - 3 >= 0 && y - 3 >= 0) &&
+		grid[y - 1][x - 1] == 'M' && grid[y - 2][x - 2] == 'A' && grid[y - 3][x - 3] == 'S')
+	{
+		matches++;
+	}
+
+	//diag up-right
+	if ((x + 3 < grid[0].size() && y - 3 >= 0) &&
+		grid[y - 1][x + 1] == 'M' && grid[y - 2][x + 2] == 'A' && grid[y - 3][x + 3] == 'S')
+	{
+		matches++;
+	}
+
+	//diag down-left
+	if ((x - 3 >= 0 && y + 3 < grid.size()) &&
+		grid[y + 1][x - 1] == 'M' && grid[y + 2][x - 2] == 'A' && grid[y + 3][x - 3] == 'S')
+	{
+		matches++;
+	}
+
+	//diag down-right
+	if ((x + 3 < grid[0].size() && y + 3 < grid.size()) &&
+		grid[y + 1][x + 1] == 'M' && grid[y + 2][x + 2] == 'A' && grid[y + 3][x + 3] == 'S')
+	{
+		matches++;
+	}
+
+	return matches;
+}
+
+bool GetXmasMatchesP2(std::vector<std::vector<char>> grid, const int x, const int y)
+{
+	if (grid.size() == 0) { return false; }
+
+	if (grid.size() == 0 || 
+		(x - 1 < 0 || y - 1 < 0 || y + 1 >= grid.size() || x + 1 >= grid[0].size()) )
+	{
+		return false;
+	}
+
+	if ((grid[y - 1][x - 1] == 'M' && grid[y + 1][x + 1] == 'S') ||
+		grid[y - 1][x - 1] == 'S' && grid[y + 1][x + 1] == 'M')
+	{
+		if ((grid[y - 1][x + 1] == 'M' && grid[y + 1][x - 1] == 'S') ||
+			grid[y - 1][x + 1] == 'S' && grid[y + 1][x - 1] == 'M')
+		{
+			return true;
+		}
+	}
+
+	return false;
+}

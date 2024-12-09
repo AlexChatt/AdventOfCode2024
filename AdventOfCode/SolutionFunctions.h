@@ -15,3 +15,7 @@ void DayTwoSolution(std::string input);
 bool CheckValidSequence(std::vector<int> Sequence, int& problemIndex, bool bisAscending, int ignoreElement);
 
 void DayThreeSolution(std::string input);
+
+void DayFourSolution(std::string input);
+int GetXmasMatchesP1(std::vector<std::vector<char>> grid, const int x, const int y);
+bool GetXmasMatchesP2(std::vector<std::vector<char>> grid, const int x, const int y);
