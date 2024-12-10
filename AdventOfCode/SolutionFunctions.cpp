@@ -331,3 +331,92 @@ bool GetXmasMatchesP2(std::vector<std::vector<char>> grid, const int x, const in
 
 	return false;
 }
+
+void DayFiveSolution(std::string input)
+{
+	int combinedMidScore = 0;
+	std::unordered_map<int, std::set<int>> Rules;
+	std::vector<std::vector<int>> PageNumbers;
+	bool bRulesRead = false;
+	std::ifstream inputfile(input);
+
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file" << input << "\n";
+		return;
+	}
+
+	std::string line;
+	while (std::getline(inputfile, line))
+	{
+		if (line == "")
+		{
+			bRulesRead = true;
+		}
+		else
+		{
+			if (!bRulesRead)
+			{
+				std::string::size_type dividedPos = line.find('|');
+				int page1 = std::stoi(line.substr(0, dividedPos));
+				int page2 = std::stoi(line.substr(dividedPos + 1, line.size()));
+				Rules[page1].insert(page2);
+			}
+			else
+			{
+				std::vector<int> sequence;
+				std::string number;
+				std::stringstream ss(line);
+				while (std::getline(ss, number, ','))
+				{
+					sequence.push_back(std::stoi(number));
+				}
+				PageNumbers.push_back(sequence);
+			}
+		}
+	}
+	inputfile.close();
+
+	for (int i = 0; i < PageNumbers.size(); i++)
+	{
+		if (checkIfSequenceValid(PageNumbers[i], Rules))
+		{
+			combinedMidScore += PageNumbers[i][PageNumbers[i].size() / 2];
+		}
+	}
+
+	std::cout << "Total mid page numbers are " << combinedMidScore << "\n";
+}
+
+bool checkIfSequenceValid(std::vector<int> sequence, std::unordered_map<int, std::set<int>> Rules)
+{
+	std::set<int> BannedNums;
+	std::vector<int> seenNumbers;
+
+	if (sequence.size() == 0) { return true; }
+	seenNumbers.push_back(sequence[0]);
+
+	for (int i = 1; i < sequence.size(); i++)
+	{
+		if (!checkNumbersValid(Rules[sequence[i]], seenNumbers))
+		{
+			return false;
+		}
+		seenNumbers.push_back(sequence[i]);
+	}
+
+	return true;
+}
+
+bool checkNumbersValid(std::set<int> InvalidNums, std::vector<int> NumsSeen)
+{
+	for (int i = 0; i < NumsSeen.size(); i++)
+	{
+		if (InvalidNums.find(NumsSeen[i]) != InvalidNums.end())
+		{
+			return false;
+		}
+	}
+
+	return true;
+}

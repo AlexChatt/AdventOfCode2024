@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <set>
 #include <unordered_map>
 #include <string>
 #include <fstream>
@@ -19,3 +20,7 @@ void DayThreeSolution(std::string input);
 void DayFourSolution(std::string input);
 int GetXmasMatchesP1(std::vector<std::vector<char>> grid, const int x, const int y);
 bool GetXmasMatchesP2(std::vector<std::vector<char>> grid, const int x, const int y);
+
+void DayFiveSolution(std::string input);
+bool checkIfSequenceValid(std::vector<int> sequence, std::unordered_map<int, std::set<int>> Rules);
+bool checkNumbersValid(std::set<int> InvalidNums, std::vector<int> NumsSeen);
