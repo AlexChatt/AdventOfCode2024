@@ -23,4 +23,5 @@ bool GetXmasMatchesP2(std::vector<std::vector<char>> grid, const int x, const in
 
 void DayFiveSolution(std::string input);
 bool checkIfSequenceValid(std::vector<int> sequence, std::unordered_map<int, std::set<int>> Rules);
-bool checkNumbersValid(std::set<int> InvalidNums, std::vector<int> NumsSeen);
+int FixInvalidSequence(std::vector<int> &sequence, std::unordered_map<int, std::set<int>> Rules);
+bool checkNumbersValid(std::set<int> InvalidNums, std::vector<int> NumsSeen, int& NumsSeenIndex);

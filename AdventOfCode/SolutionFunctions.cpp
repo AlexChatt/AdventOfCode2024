@@ -334,9 +334,10 @@ bool GetXmasMatchesP2(std::vector<std::vector<char>> grid, const int x, const in
 
 void DayFiveSolution(std::string input)
 {
-	int combinedMidScore = 0;
+	int combinedMidScore = 0, combinedFixedMidScore = 0;
 	std::unordered_map<int, std::set<int>> Rules;
 	std::vector<std::vector<int>> PageNumbers;
+	std::vector<int> InvalidSequences;
 	bool bRulesRead = false;
 	std::ifstream inputfile(input);
 
@@ -383,22 +384,33 @@ void DayFiveSolution(std::string input)
 		{
 			combinedMidScore += PageNumbers[i][PageNumbers[i].size() / 2];
 		}
+		else
+		{
+			InvalidSequences.push_back(i);
+		}
 	}
 
-	std::cout << "Total mid page numbers are " << combinedMidScore << "\n";
+	std::cout << "Total mid page numbers is " << combinedMidScore << "\n";
+
+	for (int i = 0; i < InvalidSequences.size(); i++)
+	{
+		combinedFixedMidScore += FixInvalidSequence(PageNumbers[InvalidSequences[i]], Rules);
+	}
+
+	std::cout << "Total mid page numbers for fixed sets is " << combinedFixedMidScore << "\n";
 }
 
 bool checkIfSequenceValid(std::vector<int> sequence, std::unordered_map<int, std::set<int>> Rules)
 {
-	std::set<int> BannedNums;
 	std::vector<int> seenNumbers;
+	int throwaway;
 
 	if (sequence.size() == 0) { return true; }
 	seenNumbers.push_back(sequence[0]);
 
 	for (int i = 1; i < sequence.size(); i++)
 	{
-		if (!checkNumbersValid(Rules[sequence[i]], seenNumbers))
+		if (!checkNumbersValid(Rules[sequence[i]], seenNumbers, throwaway))
 		{
 			return false;
 		}
@@ -408,12 +420,44 @@ bool checkIfSequenceValid(std::vector<int> sequence, std::unordered_map<int, std
 	return true;
 }
 
-bool checkNumbersValid(std::set<int> InvalidNums, std::vector<int> NumsSeen)
+int FixInvalidSequence(std::vector<int> &sequence, std::unordered_map<int, std::set<int>> Rules)
+{
+	int insertIndex;
+	std::vector<int>::iterator iter;
+	std::vector<int> seenNumbers;
+
+	if (sequence.size() == 0) { return true; }
+	seenNumbers.push_back(sequence[0]);
+
+	for (int i = 1; i < sequence.size(); i++)
+	{
+		if (!checkNumbersValid(Rules[sequence[i]], seenNumbers, insertIndex))
+		{
+			int temp = sequence[i];
+			sequence.erase(sequence.begin() + i);
+			iter = sequence.begin() + insertIndex;
+			sequence.insert(iter, temp);
+			i = insertIndex;
+			seenNumbers.resize(i);
+			seenNumbers.push_back(sequence[insertIndex]);
+		}
+		else
+		{
+			seenNumbers.push_back(sequence[i]);
+		}
+
+	}
+
+	return sequence[sequence.size()/2];
+}
+
+bool checkNumbersValid(std::set<int> InvalidNums, std::vector<int> NumsSeen, int &NumsSeenIndex)
 {
 	for (int i = 0; i < NumsSeen.size(); i++)
 	{
 		if (InvalidNums.find(NumsSeen[i]) != InvalidNums.end())
 		{
+			NumsSeenIndex = i;
 			return false;
 		}
 	}
