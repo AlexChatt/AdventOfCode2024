@@ -9,5 +9,6 @@ int main()
 	//DayTwoSolution("input2.txt");
 	//DayThreeSolution("input3.txt");
 	//DayFourSolution("input4.txt");
-	DayFiveSolution("input5.txt");
+	//DayFiveSolution("input5.txt");
+	DaySixSolution("input6.txt");
 }

@@ -1,4 +1,4 @@
-#include "SolutionFunctions.h"
+﻿#include "SolutionFunctions.h"
 
 void DayOneSolution(std::string input)
 {
@@ -463,4 +463,115 @@ bool checkNumbersValid(std::set<int> InvalidNums, std::vector<int> NumsSeen, int
 	}
 
 	return true;
+}
+
+void DaySixSolution(std::string input)
+{
+	std::vector<std::vector<char>> map;
+	std::pair<int, int> playerPos;
+	bool bFoundPlayer = false;
+	int playerDir = direction::UP;
+	int PositionsUsed = 0;
+
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file" << input << "\n";
+		return;
+	}
+
+	std::string line;
+	while (std::getline(inputfile, line))
+	{
+		std::vector<char> data(line.begin(), line.end());
+		if (!bFoundPlayer)
+		{
+			std::size_t player = line.find_first_of("<>^");
+			if (player != std::string::npos)
+			{
+				if (line[player] == '>')
+				{
+					playerDir = direction::RIGHT;
+				}
+				else if (line[player] == '<')
+				{
+					playerDir = direction::LEFT;
+				}
+				else if (line[player] == '^')
+				{
+					playerDir = direction::UP;
+				}
+				playerPos = std::pair<int, int>{ map.size(),player};
+				bFoundPlayer = true;
+			}
+		}
+		map.push_back(data);
+	}
+
+	if (map.size() < 0 || bFoundPlayer != true)
+	{
+		return;
+	}
+
+	while ( (playerPos.first >= 0 && playerPos.first < map.size()) &&
+		    playerPos.second >= 0 && playerPos.second < map[0].size())
+	{
+		if (map[playerPos.first][playerPos.second] != 'X')
+		{
+			PositionsUsed++;
+			map[playerPos.first][playerPos.second] = 'X';
+		}
+
+		switch (playerDir)
+		{
+		case UP:
+			if (playerPos.first - 1 >= 0 &&
+				map[playerPos.first - 1][playerPos.second] == '#')
+			{
+				playerDir++;
+			}
+			else
+			{
+				playerPos.first--;
+			}
+			break;
+		case RIGHT:
+			if (playerPos.second + 1 < map[0].size() && 
+				map[playerPos.first][playerPos.second+1] == '#')
+			{
+				playerDir++;
+			}
+			else
+			{
+				playerPos.second++;
+			}
+			break;
+		case DOWN:
+			if (playerPos.first + 1 < map.size() &&
+				map[playerPos.first + 1][playerPos.second] == '#')
+			{
+				playerDir++;
+			}
+			else
+			{
+				playerPos.first++;
+			}
+			break;
+		case LEFT:
+			if (playerPos.second-1 >= 0 && 
+				map[playerPos.first][playerPos.second-1] == '#')
+			{
+				playerDir = direction::UP;
+			}
+			else
+			{
+				playerPos.second--;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	std::cout << "Total distinct positions visited: " << PositionsUsed << "\n";
 }

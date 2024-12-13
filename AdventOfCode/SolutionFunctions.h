@@ -25,3 +25,12 @@ void DayFiveSolution(std::string input);
 bool checkIfSequenceValid(std::vector<int> sequence, std::unordered_map<int, std::set<int>> Rules);
 int FixInvalidSequence(std::vector<int> &sequence, std::unordered_map<int, std::set<int>> Rules);
 bool checkNumbersValid(std::set<int> InvalidNums, std::vector<int> NumsSeen, int& NumsSeenIndex);
+
+enum direction
+{
+	UP = 0,
+	RIGHT = 1,
+	DOWN = 2,
+	LEFT = 3
+};
+void DaySixSolution(std::string input);
