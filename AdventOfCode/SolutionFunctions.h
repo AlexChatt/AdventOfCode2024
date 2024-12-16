@@ -33,4 +33,27 @@ enum direction
 	DOWN = 2,
 	LEFT = 3
 };
+struct visitedPoints
+{
+	std::pair<int, int> location;
+	int dir = 0;
+
+	visitedPoints(int x, int y, int d)
+	{
+		location = {x, y};
+		dir = d;
+	}
+
+	bool operator<(const visitedPoints& other) const
+	{
+		if (location < other.location) return true;
+		if (location > other.location) return false;
+		return dir < other.dir;
+	}
+	bool operator=(const visitedPoints& other) const
+	{
+		return location == other.location && dir == other.dir;
+	}
+};
 void DaySixSolution(std::string input);
+bool RouteTraverse(std::vector<std::vector<char>> map, std::pair<int, int> playerPos, int playerDir, std::vector<std::pair<int,int>>& visitedLocation);

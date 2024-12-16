@@ -471,7 +471,8 @@ void DaySixSolution(std::string input)
 	std::pair<int, int> playerPos;
 	bool bFoundPlayer = false;
 	int playerDir = direction::UP;
-	int PositionsUsed = 0;
+	std::vector<std::pair<int, int>> visitedLocation;
+	int loopPlacements = 0;
 
 	std::ifstream inputfile(input);
 	if (!inputfile)
@@ -513,14 +514,41 @@ void DaySixSolution(std::string input)
 		return;
 	}
 
-	while ( (playerPos.first >= 0 && playerPos.first < map.size()) &&
-		    playerPos.second >= 0 && playerPos.second < map[0].size())
+	RouteTraverse(map, playerPos, playerDir, visitedLocation);
+	std::cout << "Total distinct positions visited: " << visitedLocation.size() << "\n";
+
+	/* Only place Barrel in locations we have walked */
+	std::vector<std::pair<int, int>> throwaway;
+	for (auto position : visitedLocation)
 	{
+		map[position.first][position.second] = '#';
+		if (!RouteTraverse(map, playerPos, playerDir, throwaway))
+		{
+			loopPlacements++;
+		}
+		map[position.first][position.second] = '.';
+	}
+
+	std::cout << "Total different positions for looping guard: " << loopPlacements << "\n";
+}
+
+bool RouteTraverse(std::vector<std::vector<char>> map, std::pair<int, int> playerPos, int playerDir, std::vector<std::pair<int, int>>& visitedLocation)
+{
+	std::set<visitedPoints> PointsVisited;
+	bool bPlayerMoved = true;
+
+	while ((playerPos.first >= 0 && playerPos.first < map.size()) &&
+		playerPos.second >= 0 && playerPos.second < map[0].size())
+	{
+		PointsVisited.insert(visitedPoints(playerPos.first, playerPos.second, playerDir));
+
 		if (map[playerPos.first][playerPos.second] != 'X')
 		{
-			PositionsUsed++;
+			visitedLocation.push_back({playerPos.first, playerPos.second});
 			map[playerPos.first][playerPos.second] = 'X';
 		}
+
+		bPlayerMoved = false;
 
 		switch (playerDir)
 		{
@@ -533,17 +561,19 @@ void DaySixSolution(std::string input)
 			else
 			{
 				playerPos.first--;
+				bPlayerMoved = true;
 			}
 			break;
 		case RIGHT:
-			if (playerPos.second + 1 < map[0].size() && 
-				map[playerPos.first][playerPos.second+1] == '#')
+			if (playerPos.second + 1 < map[0].size() &&
+				map[playerPos.first][playerPos.second + 1] == '#')
 			{
 				playerDir++;
 			}
 			else
 			{
 				playerPos.second++;
+				bPlayerMoved = true;
 			}
 			break;
 		case DOWN:
@@ -555,23 +585,34 @@ void DaySixSolution(std::string input)
 			else
 			{
 				playerPos.first++;
+				bPlayerMoved = true;
 			}
 			break;
 		case LEFT:
-			if (playerPos.second-1 >= 0 && 
-				map[playerPos.first][playerPos.second-1] == '#')
+			if (playerPos.second - 1 >= 0 &&
+				map[playerPos.first][playerPos.second - 1] == '#')
 			{
 				playerDir = direction::UP;
 			}
 			else
 			{
 				playerPos.second--;
+				bPlayerMoved = true;
 			}
 			break;
 		default:
 			break;
 		}
+
+
+		visitedPoints OldPoint(playerPos.first, playerPos.second, playerDir);
+		if (PointsVisited.find(OldPoint) != PointsVisited.end() && bPlayerMoved)
+		{
+			/* We have been here before, we are loooooooping */
+			return false;
+		}
 	}
 
-	std::cout << "Total distinct positions visited: " << PositionsUsed << "\n";
+	return true;
 }
+
