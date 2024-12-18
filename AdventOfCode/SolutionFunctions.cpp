@@ -663,6 +663,7 @@ void DaySevenSolution(std::string input)
 bool RecursiveSolve(long long int TargetNum, std::vector<int> numbers, int index, long long int sumSoFar)
 {
 	bool TargetFound = false;
+	if (sumSoFar > TargetNum) { return false; }
 	if (index == numbers.size())
 	{
 		if (sumSoFar == TargetNum)
@@ -674,6 +675,9 @@ bool RecursiveSolve(long long int TargetNum, std::vector<int> numbers, int index
 
 	TargetFound |= RecursiveSolve(TargetNum, numbers, index + 1, sumSoFar + numbers[index]);
 	TargetFound |= RecursiveSolve(TargetNum, numbers, index + 1, sumSoFar * numbers[index]);
+	std::string combined = std::to_string(sumSoFar);
+	combined += std::to_string(numbers[index]);
+	TargetFound |= RecursiveSolve(TargetNum, numbers, index + 1, std::stoll(combined));
 
 	return TargetFound;
 }
