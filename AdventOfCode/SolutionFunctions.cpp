@@ -508,6 +508,7 @@ void DaySixSolution(std::string input)
 		}
 		map.push_back(data);
 	}
+	inputfile.close();
 
 	if (map.size() < 0 || bFoundPlayer != true)
 	{
@@ -604,7 +605,6 @@ bool RouteTraverse(std::vector<std::vector<char>> map, std::pair<int, int> playe
 			break;
 		}
 
-
 		visitedPoints OldPoint(playerPos.first, playerPos.second, playerDir);
 		if (PointsVisited.find(OldPoint) != PointsVisited.end() && bPlayerMoved)
 		{
@@ -614,5 +614,67 @@ bool RouteTraverse(std::vector<std::vector<char>> map, std::pair<int, int> playe
 	}
 
 	return true;
+}
+
+void DaySevenSolution(std::string input)
+{
+	long long int P1Answer = 0;
+	std::vector<std::pair<long long int, std::vector<int>>> TotalWithNumbers;
+
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file" << input << "\n";
+		return;
+	}
+
+	std::string line;
+	while (std::getline(inputfile, line))
+	{
+		std::pair<long long int, std::vector<int>> temp;
+		std::string snumber;
+		std::stringstream ss(line);
+		while (std::getline(ss, snumber, ' '))
+		{
+			if (snumber[snumber.size()-1] == ':')
+			{
+				snumber.pop_back();
+				temp.first = std::stoll(snumber);
+			}
+			else
+			{
+				temp.second.push_back(std::stoll(snumber));
+			}
+		}
+		TotalWithNumbers.push_back(temp);
+	}
+	inputfile.close();
+
+	for (auto set : TotalWithNumbers)
+	{
+		if (RecursiveSolve(set.first, set.second, 1, set.second[0]))
+		{
+			P1Answer += set.first;
+		}
+	}
+	std::cout << "Total calibration result is: " << P1Answer << "\n";
+}
+
+bool RecursiveSolve(long long int TargetNum, std::vector<int> numbers, int index, long long int sumSoFar)
+{
+	bool TargetFound = false;
+	if (index == numbers.size())
+	{
+		if (sumSoFar == TargetNum)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	TargetFound |= RecursiveSolve(TargetNum, numbers, index + 1, sumSoFar + numbers[index]);
+	TargetFound |= RecursiveSolve(TargetNum, numbers, index + 1, sumSoFar * numbers[index]);
+
+	return TargetFound;
 }
 

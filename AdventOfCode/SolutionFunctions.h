@@ -57,3 +57,6 @@ struct visitedPoints
 };
 void DaySixSolution(std::string input);
 bool RouteTraverse(std::vector<std::vector<char>> map, std::pair<int, int> playerPos, int playerDir, std::vector<std::pair<int,int>>& visitedLocation);
+
+void DaySevenSolution(std::string input);
+bool RecursiveSolve(long long int TargetNum, std::vector<int> numbers, int index, long long int sumSoFar);
