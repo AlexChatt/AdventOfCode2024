@@ -682,3 +682,77 @@ bool RecursiveSolve(long long int TargetNum, std::vector<int> numbers, int index
 	return TargetFound;
 }
 
+void DayEightSolution(std::string input)
+{
+	std::vector<std::vector<bool>> map;
+	std::unordered_map<char, std::vector<antenna>> antennas;
+	int antinode = 0;
+	std::ifstream inputfile(input);
+
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file" << input << "\n";
+		return;
+	}
+
+	std::string line;
+	int yLine = 0;
+	while (std::getline(inputfile, line))
+	{
+		map.push_back(std::vector<bool>(line.size()));
+		for (int i = 0; i < line.size(); i++)
+		{
+			if (line[i] != '.')
+			{
+				antenna temp;
+				temp.position = std::pair<int, int>{ i,yLine};
+				antennas[line[i]].push_back(temp);
+			}
+		}
+		yLine++;
+	}
+	inputfile.close();
+
+	for (std::unordered_map<char, std::vector<antenna>>::iterator it = antennas.begin(); it != antennas.end(); ++it)
+	{
+		antinode += GetAntennaPoints(it->second, map);
+	}
+
+	std::cout << "Unique locations in the map that contain antinodes are: " << antinode << "\n";
+}
+
+int GetAntennaPoints(std::vector<antenna> antentas, std::vector<std::vector<bool>>& map)
+{
+	int newAntinode = 0;
+	std::pair<int, int> mapsize;
+
+	if (map.size() <= 0) { return 0; }
+
+	mapsize = { map[0].size(), map.size() };
+
+	for (int i = 0; i < antentas.size(); i++)
+	{
+		for (int j = i+1; j < antentas.size(); j++)
+		{
+			std::pair<int, int> p1, p2;
+			p1 = { antentas[i].position.first - antentas[j].position.first, antentas[i].position.second - antentas[j].position.second };
+			p1 = { p1.first + antentas[i].position.first, p1.second + antentas[i].position.second };
+			if (!IsOutOfBounds(p1, mapsize) && !map[p1.first][p1.second])
+			{
+				map[p1.first][p1.second] = true;
+				newAntinode++;
+			}
+
+			p2 = { antentas[j].position.first - antentas[i].position.first, antentas[j].position.second - antentas[i].position.second };
+			p2 = { p2.first + antentas[j].position.first, p2.second + antentas[j].position.second };
+			if (!IsOutOfBounds(p2, mapsize) && !map[p2.first][p2.second])
+			{
+				map[p2.first][p2.second] = true;
+				newAntinode++;
+			}
+		}
+	}
+
+	return newAntinode;
+}
+

@@ -60,3 +60,12 @@ bool RouteTraverse(std::vector<std::vector<char>> map, std::pair<int, int> playe
 
 void DaySevenSolution(std::string input);
 bool RecursiveSolve(long long int TargetNum, std::vector<int> numbers, int index, long long int sumSoFar);
+
+
+struct antenna
+{
+	bool bIsAntinode = false;
+	std::pair<int, int> position;
+};
+void DayEightSolution(std::string input);
+int GetAntennaPoints(std::vector<antenna> antentas, std::vector<std::vector<bool>>& map);

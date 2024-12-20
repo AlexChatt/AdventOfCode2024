@@ -65,3 +65,11 @@ bool isAscendingOrder(std::vector<int> Sequence)
 	return true;
 }
 
+bool IsOutOfBounds(std::pair<int, int> location, std::pair<int, int> maxSize)
+{
+	if (location.first < 0 || location.second < 0) { return true; }
+	if (location.first >= maxSize.first || location.second >= maxSize.second) { return true; }
+
+	return false;
+}
+
