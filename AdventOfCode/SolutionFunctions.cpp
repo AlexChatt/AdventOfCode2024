@@ -734,22 +734,41 @@ int GetAntennaPoints(std::vector<antenna> antentas, std::vector<std::vector<bool
 	{
 		for (int j = i+1; j < antentas.size(); j++)
 		{
-			std::pair<int, int> p1, p2;
-			p1 = { antentas[i].position.first - antentas[j].position.first, antentas[i].position.second - antentas[j].position.second };
-			p1 = { p1.first + antentas[i].position.first, p1.second + antentas[i].position.second };
-			if (!IsOutOfBounds(p1, mapsize) && !map[p1.first][p1.second])
+			std::pair<int, int> p1 = antentas[i].position, p2 = antentas[j].position;
+			std::pair<int, int> increaseP1, increaseP2;
+
+			increaseP1 = { antentas[i].position.first - antentas[j].position.first, antentas[i].position.second - antentas[j].position.second };
+			p1 = { increaseP1.first + p1.first, increaseP1.second + p1.second };
+			while (!IsOutOfBounds(p1, mapsize))
 			{
-				map[p1.first][p1.second] = true;
-				newAntinode++;
+				if (!map[p1.first][p1.second])
+				{
+					newAntinode++;
+					map[p1.first][p1.second] = true;
+				}
+				p1 = { increaseP1.first + p1.first, increaseP1.second + p1.second };
 			}
 
-			p2 = { antentas[j].position.first - antentas[i].position.first, antentas[j].position.second - antentas[i].position.second };
-			p2 = { p2.first + antentas[j].position.first, p2.second + antentas[j].position.second };
-			if (!IsOutOfBounds(p2, mapsize) && !map[p2.first][p2.second])
+			increaseP2 = { antentas[j].position.first - antentas[i].position.first, antentas[j].position.second - antentas[i].position.second };
+			p2 = { increaseP2.first + p2.first, increaseP2.second + p2.second };
+			while (!IsOutOfBounds(p2, mapsize))
 			{
-				map[p2.first][p2.second] = true;
-				newAntinode++;
+				if (!map[p2.first][p2.second])
+				{
+					newAntinode++;
+					map[p2.first][p2.second] = true;
+				}
+				p2 = { increaseP2.first + p2.first, increaseP2.second + p2.second };
 			}
+		}
+	}
+
+	for (int i = 0; i < antentas.size() && antentas.size() > 1; i++)
+	{
+		if(!map[antentas[i].position.first][antentas[i].position.second])
+		{
+			map[antentas[i].position.first][antentas[i].position.second] = true;
+			newAntinode++;
 		}
 	}
 
