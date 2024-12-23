@@ -775,3 +775,75 @@ int GetAntennaPoints(std::vector<antenna> antentas, std::vector<std::vector<bool
 	return newAntinode;
 }
 
+void DayNineSolution(std::string input)
+{
+	std::vector<int> file;
+	bool bisSpaces = false;
+	long long int id = 0;
+	unsigned long long int checksum = 0;
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file" << input << "\n";
+		return;
+	}
+
+	std::string line;
+	std::getline(inputfile, line);
+	for ( auto number : line )
+	{
+		int convert = number - '0';
+		if (bisSpaces)
+		{
+			std::vector<int> tofill(convert, -1);
+			file.insert(file.end(), tofill.begin(), tofill.end());
+		}
+		else
+		{
+			std::vector<int> tofill(convert, id);
+			file.insert(file.end(), tofill.begin(), tofill.end());
+			id++;
+		}
+
+		bisSpaces = !bisSpaces;
+	}
+	inputfile.close();
+	id = 0;
+
+	//Sliding windows solution
+	int min = 0, max = file.size() - 1;
+
+	while(file[max] == '.')
+	{
+		max--;
+	}
+
+	while (min <= max)
+	{
+		if (file[max] == -1)
+		{
+			max--;
+		}
+		else
+		{
+			if (file[min] == -1)
+			{
+				file[min] = file[max];
+				file[max] = -1;
+				max--;
+			}
+			min++;
+		}
+	}
+
+	file.resize(max+1);
+
+	for (auto const number : file)
+	{
+		checksum += (int(number) * id);
+		id++;
+	}
+
+	std::cout << "Resulting filesystem checksum of input is " << checksum << "\n";
+}
+

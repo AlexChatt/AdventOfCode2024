@@ -69,3 +69,5 @@ struct antenna
 };
 void DayEightSolution(std::string input);
 int GetAntennaPoints(std::vector<antenna> antentas, std::vector<std::vector<bool>>& map);
+
+void DayNineSolution(std::string input);
