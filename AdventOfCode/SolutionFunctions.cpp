@@ -780,7 +780,6 @@ void DayNineSolution(std::string input)
 	std::vector<int> file;
 	bool bisSpaces = false;
 	long long int id = 0;
-	unsigned long long int checksum = 0;
 	std::ifstream inputfile(input);
 	if (!inputfile)
 	{
@@ -808,12 +807,19 @@ void DayNineSolution(std::string input)
 		bisSpaces = !bisSpaces;
 	}
 	inputfile.close();
-	id = 0;
 
+
+	DayNineP1(file);
+	DayNineP2(file);
+}
+
+void DayNineP1(std::vector<int> file)
+{
 	//Sliding windows solution
 	int min = 0, max = file.size() - 1;
+	unsigned long long int checksum = 0, id = 0;
 
-	while(file[max] == '.')
+	while (file[max] == '.')
 	{
 		max--;
 	}
@@ -836,7 +842,7 @@ void DayNineSolution(std::string input)
 		}
 	}
 
-	file.resize(max+1);
+	file.resize(max + 1);
 
 	for (auto const number : file)
 	{
@@ -845,5 +851,184 @@ void DayNineSolution(std::string input)
 	}
 
 	std::cout << "Resulting filesystem checksum of input is " << checksum << "\n";
+
 }
 
+void DayNineP2(std::vector<int> file)
+{
+	unsigned long long int checksum = 0, id = 0;
+	std::map<int, std::pair<int, int>> fileMap;
+
+	int CurrentNum = -1, count = 0, startingI = 0;
+	for (int i = 0; i <= file.size(); i++)
+	{
+		if (i >= file.size() || file[i] != CurrentNum)
+		{
+			if (CurrentNum != -1)
+			{
+				fileMap[CurrentNum] = std::pair<int, int>{ startingI,count };
+			}
+			if(i < file.size()) { CurrentNum = file[i]; }
+			count = 1;
+			startingI = i;
+		}
+		else
+		{
+			count++;
+		}
+	}
+
+	count = 0;
+	while (fileMap.size() > 0)
+	{
+		auto mapit = (--fileMap.end());
+
+		for (int i = 0; i < mapit->second.first; i++)
+		{
+			if (file[i] == -1)
+			{
+				count++;
+
+				if (count == mapit->second.second)
+				{
+					int j, k;
+					for (j = (i+1) - count, k = mapit->second.first; j < (i+1) && k < mapit->second.first + count; j++, k++)
+					{
+						file[j] = mapit->first;
+						file[k] = -1;
+					}
+					break;
+				}
+			}
+			else
+			{
+				count = 0;
+			}
+		}
+		fileMap.erase(mapit->first);
+	}
+
+	// We go back to front looking through the file and can only attempt to 
+	// move each file once, if we cant move it then we dont try again
+
+	for (auto const number : file)
+	{
+		if (number != -1)
+		{
+			checksum += (int(number) * id);
+		}
+		id++;
+	}
+
+	std::cout << "Resulting filesystem checksum of input is " << checksum << "\n";
+
+}
+
+void DayTenSolution(std::string input)
+{
+	std::vector<std::vector<int>> Map;
+	std::vector<std::pair<int, int>> StartingPoints;
+	int trailHead = 0;
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file" << input << "\n";
+		return;
+	}
+
+	std::string line;
+	while (std::getline(inputfile, line))
+	{
+		std::vector<int> s;
+		for (int i = 0; i < line.size(); i++)
+		{
+			int convert;
+			if (line[i] == '.')
+			{
+				convert = -1;
+			}
+			else
+			{
+				convert = line[i] - '0';
+			}
+			s.push_back(convert);
+			if (convert == 0)
+			{
+				StartingPoints.push_back(std::pair<int,int>(Map.size(),i));
+			}
+		}
+		Map.push_back(s);
+	}
+	inputfile.close();
+
+	for (int i = 0; i < StartingPoints.size(); i++)
+	{
+		std::set<std::pair<int, int>> NineSeen;
+		trailHead += GetTrailHeads(StartingPoints[i], Map, NineSeen, false);
+	}
+
+	std::cout << "Sum of the scores of all trailheads on the topographic map is: " << trailHead << "\n";
+
+	trailHead = 0;
+	for (int i = 0; i < StartingPoints.size(); i++)
+	{
+		std::set<std::pair<int, int>> NineSeen;
+		trailHead += GetTrailHeads(StartingPoints[i], Map, NineSeen, true);
+	}
+	std::cout << "The total sum of the ratings of all trailheads is: " << trailHead << "\n";
+}
+
+int GetTrailHeads(std::pair<int, int> location, std::vector<std::vector<int>> Map, std::set<std::pair<int,int>>& NineSeen, bool bP2)
+{
+	int trailHead = 0;
+
+	if (Map[location.first][location.second] == 9)
+	{
+		if ((NineSeen.find(location) == NineSeen.end() && !bP2) || bP2)
+		{
+			NineSeen.insert(std::pair<int, int>{location.first, location.second});
+			return 1;
+		}
+	}
+
+	std::vector<std::pair<int, int>> NextSteps = getValidIncrease(location, Map);
+
+	for (int i = 0; i < NextSteps.size(); i++)
+	{
+		trailHead += GetTrailHeads(NextSteps[i], Map, NineSeen, bP2);
+	}
+
+	return trailHead;
+}
+
+std::vector<std::pair<int, int>> getValidIncrease(std::pair<int, int> location, std::vector<std::vector<int>> Map)
+{
+	std::vector<std::pair<int, int>> NextSteps;
+
+	if (Map.size() == 0) { return NextSteps; }
+
+	int WantedNum = Map[location.first][location.second] + 1;
+
+	if (!IsOutOfBounds({ location.first - 1, location.second }, { Map[0].size(), Map.size() }) &&
+		Map[location.first -1][location.second] == WantedNum)
+	{
+		NextSteps.push_back({ location.first - 1, location.second });
+	}
+	if (!IsOutOfBounds({ location.first + 1, location.second }, { Map[0].size(), Map.size() }) &&
+		Map[location.first + 1][location.second] == WantedNum)
+	{
+		NextSteps.push_back({ location.first + 1, location.second });
+	}
+	if (!IsOutOfBounds({ location.first, location.second - 1 }, { Map[0].size(), Map.size() }) &&
+		Map[location.first][location.second -1] == WantedNum)
+	{
+		NextSteps.push_back({ location.first, location.second - 1});
+	}	
+	if (!IsOutOfBounds({ location.first, location.second + 1 }, { Map[0].size(), Map.size() }) &&
+		Map[location.first][location.second +1] == WantedNum)
+	{
+		NextSteps.push_back({ location.first, location.second + 1});
+	}
+
+	return NextSteps;
+}
