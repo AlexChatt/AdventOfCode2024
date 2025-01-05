@@ -78,3 +78,6 @@ void DayNineP2(std::vector<int> file);
 void DayTenSolution(std::string input);
 int GetTrailHeads(std::pair<int, int> location, std::vector<std::vector<int>> Map, std::set<std::pair<int, int>>& NineSeen, bool bP2);
 std::vector<std::pair<int, int>> getValidIncrease(std::pair<int, int> location, std::vector<std::vector<int>> Map);
+
+void DayElevanSolution(std::string input);
+void SimulateBlink(std::vector<long long> &stones);

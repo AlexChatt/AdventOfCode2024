@@ -1032,3 +1032,64 @@ std::vector<std::pair<int, int>> getValidIncrease(std::pair<int, int> location, 
 
 	return NextSteps;
 }
+
+void DayElevanSolution(std::string input)
+{
+	std::vector<long long> Stones;
+
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file" << input << "\n";
+		return;
+	}
+
+	std::string line;
+	std::getline(inputfile, line);
+
+	std::string snumber;
+	std::stringstream ss(line);
+	while (std::getline(ss, snumber, ' '))
+	{
+		Stones.push_back(std::stoi(snumber));
+	}
+
+	inputfile.close();
+
+	// Part 1
+	for (int i = 1; i <= 25; i++)
+	{
+		SimulateBlink(Stones);
+	}
+
+	std::cout << "The total number of stones are: " << Stones.size() << "\n";
+}
+
+void SimulateBlink(std::vector<long long> &stones)
+{
+	std::vector<long long> NewStones;
+
+	for (int i = 0; i < stones.size(); i++)
+	{
+		if (stones[i] == 0)
+		{
+			NewStones.push_back(1);
+		}
+		else
+		{
+			std::string numToString = std::to_string(stones[i]);
+			if (numToString.size() % 2 == 0)
+			{
+				long long latter = std::pow(10,numToString.size() / 2);
+				NewStones.push_back(stones[i] / latter);
+				NewStones.push_back(stones[i] % latter);
+			}
+			else
+			{
+				NewStones.push_back(stones[i] * 2024);
+			}
+		}
+	}
+
+	stones = NewStones;
+}
