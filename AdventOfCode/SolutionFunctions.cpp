@@ -1036,6 +1036,7 @@ std::vector<std::pair<int, int>> getValidIncrease(std::pair<int, int> location, 
 void DayElevanSolution(std::string input)
 {
 	std::vector<long long> Stones;
+	std::unordered_map<long long, long long> StonesMap;
 
 	std::ifstream inputfile(input);
 	if (!inputfile)
@@ -1051,7 +1052,9 @@ void DayElevanSolution(std::string input)
 	std::stringstream ss(line);
 	while (std::getline(ss, snumber, ' '))
 	{
-		Stones.push_back(std::stoi(snumber));
+		long long number = std::stoi(snumber);
+		Stones.push_back(number);
+		StonesMap[number]++;
 	}
 
 	inputfile.close();
@@ -1062,7 +1065,19 @@ void DayElevanSolution(std::string input)
 		SimulateBlink(Stones);
 	}
 
-	std::cout << "The total number of stones are: " << Stones.size() << "\n";
+	for (int i = 1; i <= 75; i++)
+	{
+		SimulateBlink(StonesMap);
+	}
+
+	long long p2Stones = 0;
+	for (auto stone : StonesMap)
+	{
+		p2Stones += stone.second;
+	}
+
+	std::cout << "The total number of stones after 25 blinks: " << Stones.size() << "\n";
+	std::cout << "The total number of stones after 75 blinks: " << p2Stones << "\n";
 }
 
 void SimulateBlink(std::vector<long long> &stones)
@@ -1093,3 +1108,187 @@ void SimulateBlink(std::vector<long long> &stones)
 
 	stones = NewStones;
 }
+
+void SimulateBlink(std::unordered_map<long long, long long>& stones)
+{
+	long long stoneCount = 0;
+
+    // Take a copy to run with
+	std::unordered_map<long long, long long> snapshotStones = stones;
+
+	for (auto &key : snapshotStones)
+	{
+		if (key.second == 0) { continue; }
+
+		stoneCount = key.second;
+		stones[key.first] -= stoneCount;
+
+		if (key.first == 0)
+		{
+			addToMap(stones, 1, stoneCount);
+		}
+		else
+		{
+			std::string numToString = std::to_string(key.first);
+			if (numToString.size() % 2 == 0)
+			{
+				long long latter = std::pow(10, numToString.size() / 2);
+				addToMap(stones, (key.first / latter), stoneCount);
+				addToMap(stones, (key.first % latter), stoneCount);
+			}
+			else
+			{
+				addToMap(stones, key.first * 2024, stoneCount);
+			}
+		}
+	}
+}
+
+void addToMap(std::unordered_map<long long, long long>& stones, long long stoneNum, long long stoneCount)
+{
+	if (stones.find(stoneNum) == stones.end())
+	{
+		stones[stoneNum] = 0;
+	}
+	stones[stoneNum] += stoneCount;
+}
+
+void DayTwelveSolution(std::string input)
+{
+	std::vector<std::vector<node>> garden;
+	std::vector<std::vector<node>> regions;
+	int TotalPrice = 0;
+
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file " << input << "\n";
+		return;
+	}
+
+	node newNode('y', std::pair<int, int>(1, 1));
+
+	std::string line;
+	int y = 0;
+	while (std::getline(inputfile, line))
+	{
+		if (line.size() > 0)
+		{
+			std::vector<node> gardenLine;
+			for (int x = 0; x < line.size(); x++)
+			{
+				node newNode(line[x], std::pair<int, int>(y, x));
+				gardenLine.push_back(newNode);
+			}
+			garden.push_back(gardenLine);
+		}
+		y++;
+	}
+	inputfile.close();
+
+	for (int y = 0; y < garden.size(); y++)
+	{
+		for (int x = 0; x < garden[0].size(); x++)
+		{
+			if (garden[y][x].bseen)
+			{
+				continue;
+			}
+			GetRegions(garden[y][x], garden, regions);
+		}
+	}
+
+	std::pair<int, int> MaxBounds(garden.size(), garden[0].size());
+	for (int i = 0; i < regions.size(); i++)
+	{
+		int area = regions[i].size();
+		int perimeter = 0;
+		for (int j = 0; j < regions[i].size(); j++)
+		{
+			int x = regions[i][j].location.second;
+			y = regions[i][j].location.first;
+			char Ptype = garden[y][x].plantType;
+
+			if (IsOutOfBounds(std::pair<int, int>(y - 1, x), MaxBounds) ||
+				garden[y - 1][x].plantType != Ptype)
+			{
+				perimeter++;
+			}
+			if (IsOutOfBounds(std::pair<int, int>(y + 1, x), MaxBounds) ||
+				garden[y + 1][x].plantType != Ptype)
+			{
+				perimeter++;
+			}
+			if (IsOutOfBounds(std::pair<int, int>(y, x - 1), MaxBounds) ||
+				garden[y][x - 1].plantType != Ptype)
+			{
+				perimeter++;
+			}
+			if (IsOutOfBounds(std::pair<int, int>(y, x + 1), MaxBounds) ||
+				garden[y][x + 1].plantType != Ptype)
+			{
+				perimeter++;
+			}
+		}
+		TotalPrice += area * perimeter;
+	}
+
+	std::cout << "The total price for fences in this garden is: " << TotalPrice << "\n";
+}
+
+void GetRegions(node p1, std::vector<std::vector<node>> &garden, std::vector<std::vector<node>>& regions)
+{
+	std::vector<node> CurrentList = {p1};
+	std::vector<node> NewRegion;
+
+	/* mark the og as seen */
+	garden[p1.location.first][p1.location.second].bseen = true;
+
+	while (CurrentList.size() > 0)
+	{
+		node current = CurrentList[CurrentList.size()-1];
+		NewRegion.push_back(current);
+		CurrentList.pop_back();
+
+		std::vector<node> MatchingPlantsNeig = GetMatchingPlantNeigbours(current, garden);
+		CurrentList.insert(CurrentList.end(), MatchingPlantsNeig.begin(), MatchingPlantsNeig.end());
+	}
+
+	regions.push_back(NewRegion);
+}
+
+std::vector<node> GetMatchingPlantNeigbours(node p1, std::vector<std::vector<node>>& garden)
+{
+	std::vector<node> matchingPlantNeibours;
+	std::pair<int, int> MaxBounds(garden.size(), garden[0].size());
+
+	int y = p1.location.first, x = p1.location.second;
+
+	if (!IsOutOfBounds(std::pair<int, int>(y-1, x), MaxBounds) &&
+		garden[y-1][x].plantType == p1.plantType && !garden[y - 1][x].bseen)
+	{
+		garden[y - 1][x].bseen = true;
+		matchingPlantNeibours.push_back(garden[y - 1][x]);
+	}
+	if (!IsOutOfBounds(std::pair<int, int>(y+1, x), MaxBounds) &&
+		garden[y + 1][x].plantType == p1.plantType && !garden[y + 1][x].bseen)
+	{
+		garden[y + 1][x].bseen = true;
+		matchingPlantNeibours.push_back(garden[y + 1][x]);
+	}
+	if (!IsOutOfBounds(std::pair<int, int>(y, x-1), MaxBounds) &&
+		garden[y][x - 1].plantType == p1.plantType && !garden[y][x-1].bseen)
+	{
+		garden[y][x-1].bseen = true;
+		matchingPlantNeibours.push_back(garden[y][x-1]);
+	}
+	if (!IsOutOfBounds(std::pair<int, int>(y, x+1), MaxBounds) &&
+		garden[y][x + 1].plantType == p1.plantType && !garden[y][x+1].bseen)
+	{
+		garden[y][x+1].bseen = true;
+		matchingPlantNeibours.push_back(garden[y][x+1]);
+	}
+
+	return matchingPlantNeibours;
+}
+

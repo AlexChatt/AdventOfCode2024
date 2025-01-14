@@ -81,3 +81,25 @@ std::vector<std::pair<int, int>> getValidIncrease(std::pair<int, int> location, 
 
 void DayElevanSolution(std::string input);
 void SimulateBlink(std::vector<long long> &stones);
+void SimulateBlink(std::unordered_map<long long, long long>& stones);
+void addToMap(std::unordered_map<long long, long long>& stones, long long stoneNum, long long stoneCount);
+
+struct node
+{
+	char plantType;
+	bool bseen;
+	std::pair<int, int> location;
+
+	node() : plantType('\0'), bseen(false), location(std::pair<int, int>(-1, -1)) {};
+
+	node(char pType, std::pair<int, int> loc)
+	{
+		plantType = pType;
+		location = loc;
+		bseen = false;
+	}
+
+};
+void DayTwelveSolution(std::string input);
+void GetRegions(node p1, std::vector<std::vector<node>>& garden, std::vector<std::vector<node>>& regions);
+std::vector<node> GetMatchingPlantNeigbours(node p1, std::vector<std::vector<node>>& garden);
