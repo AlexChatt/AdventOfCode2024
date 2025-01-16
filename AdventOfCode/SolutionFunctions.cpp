@@ -1235,7 +1235,7 @@ void DayTwelveSolution(std::string input)
 			}
 		}
 	}
-	for (auto id : areas)
+	for (auto& id : areas)
 	{
 		TotalPrice += areas[id.first] * perimeter[id.first];
 	}
@@ -1295,7 +1295,7 @@ void DayTwelveSolution(std::string input)
 			}
 		}
 	}
-	for (auto id : areas)
+	for (auto& id : areas)
 	{
 		TotalPrice += areas[id.first] * sides[id.first];
 	}
