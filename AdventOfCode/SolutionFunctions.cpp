@@ -1186,23 +1186,27 @@ void DayTwelveSolution(std::string input)
 	}
 	inputfile.close();
 
+	uint32_t ID = 0;
+
 	for (int y = 0; y < garden.size(); y++)
 	{
 		for (int x = 0; x < garden[0].size(); x++)
 		{
-			if (garden[y][x].bseen)
+			if (garden[y][x].id != -1)
 			{
 				continue;
 			}
-			GetRegions(garden[y][x], garden, regions);
+			GetRegions(garden[y][x], garden, regions, ID);
+			ID++;
 		}
 	}
 
 	std::pair<int, int> MaxBounds(garden.size(), garden[0].size());
+	std::unordered_map<uint32_t, int> areas, perimeter, sides;
+
 	for (int i = 0; i < regions.size(); i++)
 	{
-		int area = regions[i].size();
-		int perimeter = 0;
+		areas[regions[i][0].id] = regions[i].size();
 		for (int j = 0; j < regions[i].size(); j++)
 		{
 			int x = regions[i][j].location.second;
@@ -1212,83 +1216,145 @@ void DayTwelveSolution(std::string input)
 			if (IsOutOfBounds(std::pair<int, int>(y - 1, x), MaxBounds) ||
 				garden[y - 1][x].plantType != Ptype)
 			{
-				perimeter++;
+				perimeter[regions[i][0].id]++;
 			}
 			if (IsOutOfBounds(std::pair<int, int>(y + 1, x), MaxBounds) ||
 				garden[y + 1][x].plantType != Ptype)
 			{
-				perimeter++;
+				perimeter[regions[i][0].id]++;
 			}
 			if (IsOutOfBounds(std::pair<int, int>(y, x - 1), MaxBounds) ||
 				garden[y][x - 1].plantType != Ptype)
 			{
-				perimeter++;
+				perimeter[regions[i][0].id]++;
 			}
 			if (IsOutOfBounds(std::pair<int, int>(y, x + 1), MaxBounds) ||
 				garden[y][x + 1].plantType != Ptype)
 			{
-				perimeter++;
+				perimeter[regions[i][0].id]++;
 			}
 		}
-		TotalPrice += area * perimeter;
+	}
+	for (auto id : areas)
+	{
+		TotalPrice += areas[id.first] * perimeter[id.first];
 	}
 
-	std::cout << "The total price for fences in this garden is: " << TotalPrice << "\n";
+	std::cout << "Part 1: The total price for fences in this garden is: " << TotalPrice << "\n";
+
+    // Part 2
+	TotalPrice = 0;
+	for (int y = 0; y < garden.size(); y++)
+	{
+		for (int x = 0; x < garden[y].size(); x++)
+		{
+			char Ptype = garden[y][x].plantType;
+
+			if (IsOutOfBounds(std::pair<int, int>(y, x - 1), MaxBounds) || garden[y][x - 1].plantType != Ptype)
+			{
+				garden[y][x].leftSide = true;
+				if (IsOutOfBounds(std::pair<int, int>(y - 1, x), MaxBounds)
+					|| garden[y - 1][x].plantType != Ptype
+					|| !garden[y - 1][x].leftSide)
+				{
+					sides[garden[y][x].id]++;
+				}
+			}
+
+			if (IsOutOfBounds(std::pair<int, int>(y, x + 1), MaxBounds) || garden[y][x + 1].plantType != Ptype)
+			{
+				garden[y][x].rightSide = true;
+				if (IsOutOfBounds(std::pair<int, int>(y - 1, x), MaxBounds)
+					|| garden[y - 1][x].plantType != Ptype
+					|| !garden[y - 1][x].rightSide)
+				{
+					sides[garden[y][x].id]++;
+				}
+			}
+
+			if (IsOutOfBounds(std::pair<int, int>(y - 1, x), MaxBounds) || garden[y - 1][x].plantType != Ptype)
+			{
+				garden[y][x].upSide = true;
+				if (IsOutOfBounds(std::pair<int, int>(y, x - 1), MaxBounds)
+					|| garden[y][x - 1].plantType != Ptype
+					|| !garden[y][x - 1].upSide)
+				{
+					sides[garden[y][x].id]++;
+				}
+			}
+
+			if (IsOutOfBounds(std::pair<int, int>(y + 1, x), MaxBounds) || garden[y + 1][x].plantType != Ptype)
+			{
+				garden[y][x].downSide = true;
+				if (IsOutOfBounds(std::pair<int, int>(y, x - 1), MaxBounds)
+					|| garden[y][x - 1].plantType != Ptype
+					|| !garden[y][x - 1].downSide)
+				{
+					sides[garden[y][x].id]++;
+				}
+			}
+		}
+	}
+	for (auto id : areas)
+	{
+		TotalPrice += areas[id.first] * sides[id.first];
+	}
+
+	std::cout << "Part 2: The total price for fences in this garden is: " << TotalPrice << "\n";
 }
 
-void GetRegions(node p1, std::vector<std::vector<node>> &garden, std::vector<std::vector<node>>& regions)
+void GetRegions(node p1, std::vector<std::vector<node>> &garden, std::vector<std::vector<node>>& regions, uint32_t ID)
 {
-	std::vector<node> CurrentList = {p1};
+	std::queue<node> CurrentList;
 	std::vector<node> NewRegion;
 
 	/* mark the og as seen */
-	garden[p1.location.first][p1.location.second].bseen = true;
+	p1.id = garden[p1.location.first][p1.location.second].id = ID;
+	CurrentList.push(p1);
 
 	while (CurrentList.size() > 0)
 	{
-		node current = CurrentList[CurrentList.size()-1];
+		node current = CurrentList.front();
+		CurrentList.pop();
 		NewRegion.push_back(current);
-		CurrentList.pop_back();
 
-		std::vector<node> MatchingPlantsNeig = GetMatchingPlantNeigbours(current, garden);
-		CurrentList.insert(CurrentList.end(), MatchingPlantsNeig.begin(), MatchingPlantsNeig.end());
+		GetMatchingPlantNeigbours(current, garden, CurrentList);
 	}
 
 	regions.push_back(NewRegion);
 }
 
-std::vector<node> GetMatchingPlantNeigbours(node p1, std::vector<std::vector<node>>& garden)
+void GetMatchingPlantNeigbours(node p1, std::vector<std::vector<node>>& garden, std::queue<node>& CurrentList)
 {
-	std::vector<node> matchingPlantNeibours;
 	std::pair<int, int> MaxBounds(garden.size(), garden[0].size());
 
 	int y = p1.location.first, x = p1.location.second;
 
-	if (!IsOutOfBounds(std::pair<int, int>(y-1, x), MaxBounds) &&
-		garden[y-1][x].plantType == p1.plantType && !garden[y - 1][x].bseen)
+	if (!IsOutOfBounds(std::pair<int, int>(y, x - 1), MaxBounds) &&
+		garden[y][x - 1].plantType == p1.plantType && garden[y][x - 1].id == -1)
 	{
-		garden[y - 1][x].bseen = true;
-		matchingPlantNeibours.push_back(garden[y - 1][x]);
+		garden[y][x - 1].id = p1.id;
+		CurrentList.push(garden[y][x - 1]);
+	}
+	if (!IsOutOfBounds(std::pair<int, int>(y, x + 1), MaxBounds) &&
+		garden[y][x + 1].plantType == p1.plantType && garden[y][x + 1].id == -1)
+	{
+		garden[y][x + 1].id = p1.id;
+		CurrentList.push(garden[y][x + 1]);
+	}
+	if (!IsOutOfBounds(std::pair<int, int>(y-1, x), MaxBounds) &&
+		garden[y-1][x].plantType == p1.plantType && garden[y - 1][x].id == -1)
+	{
+		garden[y - 1][x].id = p1.id;
+		CurrentList.push(garden[y - 1][x]);
 	}
 	if (!IsOutOfBounds(std::pair<int, int>(y+1, x), MaxBounds) &&
-		garden[y + 1][x].plantType == p1.plantType && !garden[y + 1][x].bseen)
+		garden[y + 1][x].plantType == p1.plantType && garden[y + 1][x].id == -1)
 	{
-		garden[y + 1][x].bseen = true;
-		matchingPlantNeibours.push_back(garden[y + 1][x]);
-	}
-	if (!IsOutOfBounds(std::pair<int, int>(y, x-1), MaxBounds) &&
-		garden[y][x - 1].plantType == p1.plantType && !garden[y][x-1].bseen)
-	{
-		garden[y][x-1].bseen = true;
-		matchingPlantNeibours.push_back(garden[y][x-1]);
-	}
-	if (!IsOutOfBounds(std::pair<int, int>(y, x+1), MaxBounds) &&
-		garden[y][x + 1].plantType == p1.plantType && !garden[y][x+1].bseen)
-	{
-		garden[y][x+1].bseen = true;
-		matchingPlantNeibours.push_back(garden[y][x+1]);
+		garden[y + 1][x].id = p1.id;
+		CurrentList.push(garden[y + 1][x]);
 	}
 
-	return matchingPlantNeibours;
+	return;
 }
 

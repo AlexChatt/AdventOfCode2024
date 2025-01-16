@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <regex>
+#include <queue>
 #include "Utility.h"
 
 void DayOneSolution(std::string input);
@@ -87,19 +88,27 @@ void addToMap(std::unordered_map<long long, long long>& stones, long long stoneN
 struct node
 {
 	char plantType;
-	bool bseen;
+	int id;
 	std::pair<int, int> location;
+	bool upSide, leftSide, rightSide, downSide;
 
-	node() : plantType('\0'), bseen(false), location(std::pair<int, int>(-1, -1)) {};
+	node()
+	{
+		plantType = '\0';
+		id = -1;
+		upSide = leftSide =  rightSide = downSide = false;
+		location = std::pair<int, int>(-1, -1);
+	}
 
 	node(char pType, std::pair<int, int> loc)
 	{
+		id = -1;
 		plantType = pType;
 		location = loc;
-		bseen = false;
+		upSide = leftSide = rightSide = downSide = false;
 	}
 
 };
 void DayTwelveSolution(std::string input);
-void GetRegions(node p1, std::vector<std::vector<node>>& garden, std::vector<std::vector<node>>& regions);
-std::vector<node> GetMatchingPlantNeigbours(node p1, std::vector<std::vector<node>>& garden);
+void GetRegions(node p1, std::vector<std::vector<node>>& garden, std::vector<std::vector<node>>& regions, uint32_t ID);
+void GetMatchingPlantNeigbours(node p1, std::vector<std::vector<node>>& garden, std::queue<node>& CurrentList);
