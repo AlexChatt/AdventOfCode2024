@@ -112,3 +112,16 @@ struct node
 void DayTwelveSolution(std::string input);
 void GetRegions(node p1, std::vector<std::vector<node>>& garden, std::vector<std::vector<node>>& regions, uint32_t ID);
 void GetMatchingPlantNeigbours(node p1, std::vector<std::vector<node>>& garden, std::queue<node>& CurrentList);
+
+// 2X2 Cramer rule https://www.youtube.com/watch?v=RdLo-9jh2EM
+// good for linear problems that look like A1*{x} + B1*{y} = C1^1
+//                                         A2*{x} + B2*{y} = C2^1
+// Where x and y are the button presses
+struct machine
+{
+	std::pair<int, int> buttonA;
+	std::pair<int, int> buttonB;
+	std::pair<long long int, long long int> TargetLocation;
+
+};
+void DayThirteenSolutions(std::string input);

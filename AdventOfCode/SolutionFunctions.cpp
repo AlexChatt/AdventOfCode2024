@@ -1358,3 +1358,99 @@ void GetMatchingPlantNeigbours(node p1, std::vector<std::vector<node>>& garden, 
 	return;
 }
 
+#define BUTTONACOST 3
+#define BUTTONBCOST 1
+void DayThirteenSolutions(std::string input)
+{
+	std::vector<machine> machines;
+	unsigned long long int TotalTokensCost = 0;
+	std::regex const ButtonAReg("Button A: X\\+([0-9]+), Y\\+([0-9]+)");
+	std::regex const ButtonBReg("Button B: X\\+([0-9]+), Y\\+([0-9]+)");
+	std::regex const PrizeReg("Prize: X=([0-9]+), Y=([0-9]+)");
+
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file" << input << "\n";
+		return;
+	}
+
+	machine newMachine;
+	std::string line;
+	std::smatch m;
+	while (std::getline(inputfile, line))
+	{
+		if (std::regex_match(line, m, ButtonAReg))
+		{
+			newMachine.buttonA.first = std::stoi(m[1]);
+			newMachine.buttonA.second = std::stoi(m[2]);
+		}
+		else if (std::regex_match(line, m, ButtonBReg))
+		{
+			newMachine.buttonB.first = std::stoi(m[1]);
+			newMachine.buttonB.second = std::stoi((m[2]));
+		}
+		else if (std::regex_match(line, m, PrizeReg))
+		{
+			newMachine.TargetLocation.first = std::stoi(m[1]);
+			newMachine.TargetLocation.second = std::stoi(m[2]);
+			machines.push_back(newMachine);
+		}
+	}
+	inputfile.close();
+
+	for (int i = 0; i < machines.size(); i++)
+	{
+		int D = (machines[i].buttonA.first * machines[i].buttonB.second) -
+			(machines[i].buttonB.first * machines[i].buttonA.second);
+
+		int DX = (machines[i].TargetLocation.first * machines[i].buttonB.second) -
+			(machines[i].TargetLocation.second * machines[i].buttonB.first);
+
+		int DY = (machines[i].TargetLocation.second * machines[i].buttonA.first) - 
+			(machines[i].TargetLocation.first * machines[i].buttonA.second);
+
+		if (DX % D != 0 ||
+			DY % D != 0)
+		{
+			std::cout << "No solution avaliable for current machine index" << i << "\n";
+		}
+		else
+		{
+			int A = DX / D;
+			int B = DY / D;
+			TotalTokensCost += (A * BUTTONACOST) + (B * BUTTONBCOST);
+		}
+	}
+
+	std::cout << "The fewest tokens you would have to spend to win all possible prizes is " << TotalTokensCost << "(P1)\n";
+	TotalTokensCost = 0;
+
+	for (int i = 0; i < machines.size(); i++)
+	{
+		long long int D = (machines[i].buttonA.first * machines[i].buttonB.second) -
+			(machines[i].buttonA.second * machines[i].buttonB.first);
+
+		long long int DX = ((machines[i].TargetLocation.first + 10000000000000) * machines[i].buttonB.second) -
+			((machines[i].TargetLocation.second + 10000000000000) * machines[i].buttonB.first);
+
+	    long long int DY = ((machines[i].TargetLocation.second + 10000000000000) * machines[i].buttonA.first) -
+			((machines[i].TargetLocation.first + 10000000000000) * machines[i].buttonA.second);
+
+		if (DX % D != 0 ||
+			DY % D != 0)
+		{
+			std::cout << "No solution avaliable for current machine index" << i << "\n";
+		}
+		else
+		{
+			long long int A = DX / D;
+			long long int B = DY / D;
+			TotalTokensCost += (A * BUTTONACOST) + (B * BUTTONBCOST);
+		}
+	}
+
+	std::cout << "The fewest tokens you would have to spend to win all possible prizes is " << TotalTokensCost << "(P2)\n";
+
+}
+
