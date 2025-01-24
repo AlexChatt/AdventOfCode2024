@@ -1454,3 +1454,101 @@ void DayThirteenSolutions(std::string input)
 
 }
 
+void DayFourteenSolution(std::string input)
+{
+	std::vector<Robot> Robots;
+	const int Width = 101, Height = 103;
+	// For debugging
+	//int Map[Width][Height] = { 0 };
+
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file" << input << "\n";
+		return;
+	}
+
+	std::string line;
+	while (std::getline(inputfile, line))
+	{
+		Robot newRobot;
+		for (int i = 0; i < line.size(); i++)
+		{
+			newRobot.Location.first = std::stoi(line.substr(line.find("p=")+2));
+			newRobot.Location.second = std::stoi(line.substr(line.find(',') + 1));
+
+			std::string secondPart = line.substr(line.find("v="), sizeof(line));
+			newRobot.velocity.first = std::stoi(secondPart.substr(secondPart.find("v=") + 2));
+			newRobot.velocity.second = std::stoi(secondPart.substr(secondPart.find(",") + 1));
+		}
+
+		Robots.push_back(newRobot);
+	}
+	inputfile.close();
+
+	DayFourteenP1(100, Robots, Width, Height);
+}
+
+void DayFourteenP1(const int seconds, std::vector<Robot> Robots, const int Width, const int Height)
+{
+	int SaftyFactor = 0;
+	int TL = 0, TR = 0, BL = 0, BR = 0;
+	for (int i = 0; i < Robots.size(); i++)
+	{
+		std::pair<int, int> newpos = Robots[i].Location;
+		newpos.first += Robots[i].velocity.first * seconds;
+		newpos.second += Robots[i].velocity.second * seconds;
+
+		if (newpos.first < 0)
+		{
+			int temp = std::ceil((float)-newpos.first / (float)Width);
+			newpos.first = (Width * temp) - -newpos.first;
+		}
+		else
+		{
+			newpos.first %= Width;
+		}
+
+		if (newpos.second < 0)
+		{
+			int temp = std::ceil((float)-newpos.second / (float)Height);
+			newpos.second = (Height * temp) - -newpos.second;
+		}
+		else
+		{
+			newpos.second %= Height;
+		}
+		Robots[i].Location = newpos;
+
+
+		if (Robots[i].Location.first < (Width / 2))
+		{
+			if (Robots[i].Location.second < (Height / 2))
+			{
+				TL++;
+			}
+			else if (Robots[i].Location.second > (Height / 2))
+			{
+				BL++;
+			}
+		}
+		else if (Robots[i].Location.first > (Width / 2))
+		{
+			if (Robots[i].Location.second < (Height / 2))
+			{
+				TR++;
+			}
+			else if (Robots[i].Location.second > (Height / 2))
+			{
+				BR++;
+			}
+		}
+
+		//Map[Robots[i].Location.second][Robots[i].Location.first]++;
+	}
+
+	SaftyFactor = TL * TR * BL * BR;
+	std::cout << "P1: The Safty Factor is " << SaftyFactor << "\n";
+}
+
+

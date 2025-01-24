@@ -17,5 +17,6 @@ int main()
 	//DayTenSolution("input10.txt");
 	//DayElevanSolution("input11.txt");
 	//DayTwelveSolution("input12.txt");
-	DayThirteenSolutions("input13.txt");
+	//DayThirteenSolutions("input13.txt");
+	DayFourteenSolution("input14.txt");
 }

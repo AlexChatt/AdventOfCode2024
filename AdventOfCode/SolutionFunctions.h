@@ -125,3 +125,12 @@ struct machine
 
 };
 void DayThirteenSolutions(std::string input);
+
+struct Robot
+{
+	std::pair<int, int> Location;
+	std::pair<int, int> velocity;
+};
+
+void DayFourteenSolution(std::string input);
+void DayFourteenP1(const int seconds, std::vector<Robot> Robots, const int Width, const int Height);
