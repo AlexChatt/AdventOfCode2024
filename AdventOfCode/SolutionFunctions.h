@@ -134,3 +134,4 @@ struct Robot
 
 void DayFourteenSolution(std::string input);
 void DayFourteenP1(const int seconds, std::vector<Robot> Robots, const int Width, const int Height);
+void DayFourteenP2(const int seconds, std::vector<Robot> Robots, const int Width, const int Height);

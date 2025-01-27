@@ -1458,8 +1458,6 @@ void DayFourteenSolution(std::string input)
 {
 	std::vector<Robot> Robots;
 	const int Width = 101, Height = 103;
-	// For debugging
-	//int Map[Width][Height] = { 0 };
 
 	std::ifstream inputfile(input);
 	if (!inputfile)
@@ -1487,6 +1485,8 @@ void DayFourteenSolution(std::string input)
 	inputfile.close();
 
 	DayFourteenP1(100, Robots, Width, Height);
+	// Chinese Remainder Theorem
+	DayFourteenP2(6493, Robots, Width, Height);
 }
 
 void DayFourteenP1(const int seconds, std::vector<Robot> Robots, const int Width, const int Height)
@@ -1543,12 +1543,64 @@ void DayFourteenP1(const int seconds, std::vector<Robot> Robots, const int Width
 				BR++;
 			}
 		}
-
-		//Map[Robots[i].Location.second][Robots[i].Location.first]++;
 	}
 
 	SaftyFactor = TL * TR * BL * BR;
 	std::cout << "P1: The Safty Factor is " << SaftyFactor << "\n";
+}
+
+void DayFourteenP2(const int seconds, std::vector<Robot> Robots, const int Width, const int Height)
+{
+	std::vector<std::vector<char>> Map(Height);
+	for (int i = 0; i < Height; i++)
+	{
+		Map[i].resize(Width);
+	}
+
+	for (int i = 1; i <= seconds; i++)
+	{
+		std::vector<std::vector<char>> Map(Height);
+		std::fill(Map.begin(), Map.end(), std::vector<char>(Width, '.'));
+
+		for (int j = 0; j < Robots.size(); j++)
+		{
+			std::pair<int, int> newpos = Robots[j].Location;
+			newpos.first += Robots[j].velocity.first;
+			newpos.second += Robots[j].velocity.second;
+
+			if (newpos.first < 0) {
+				int temp = std::ceil((float)-newpos.first / (float)Width);
+				newpos.first = (Width * temp) - -newpos.first;
+			}
+			else { 
+				newpos.first %= Width; 
+			}
+			if (newpos.second < 0) {
+				int temp = std::ceil((float)-newpos.second / (float)Height);
+				newpos.second = (Height * temp) - -newpos.second;
+			}
+			else {
+				newpos.second %= Height;
+			}
+
+			Robots[j].Location = newpos;
+			Map[Robots[j].Location.second][Robots[j].Location.first] = '#';
+		}
+
+
+		if (i == seconds) 
+		{
+			std::cout << "Seconds: " << i << "\n";
+			for (int j = 0; j < Map.size(); j++)
+			{
+				std::copy(Map[j].begin(), Map[j].end(),
+					std::ostream_iterator<char>(std::cout, ""));
+				std::cout << "\n";
+			}
+			std::cin.get();
+			system("cls");
+		}
+	}
 }
 
 
