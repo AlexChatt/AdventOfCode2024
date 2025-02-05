@@ -1603,4 +1603,168 @@ void DayFourteenP2(const int seconds, std::vector<Robot> Robots, const int Width
 	}
 }
 
+void DayFiveteenSolution(std::string input)
+{
+	std::vector<std::vector<char>> Map;
+	std::vector<char> moves;
+	std::pair<int, int> playerLocation;
+	bool bOnMoveInstructions = false;
+
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file" << input << "\n";
+		return;
+	}
+
+	std::string line;
+	while (std::getline(inputfile, line))
+	{
+		if (line == "")
+		{
+			bOnMoveInstructions = true;
+		}
+
+		if (bOnMoveInstructions)
+		{
+			for (auto move : line)
+			{
+				moves.push_back(move);
+			}
+		}
+		else
+		{
+			std::vector<char> newLine;
+			for (int x = 0; x < line.size(); x++)
+			{
+				if (line[x] == '@')
+				{
+					playerLocation = std::pair<int, int>(Map.size(), x);
+				}
+				newLine.push_back(line[x]);
+			}
+			Map.push_back(newLine);
+		}
+	}
+	inputfile.close();
+
+	DayFiveteenP1(Map, moves, playerLocation);
+
+}
+
+void DayFiveteenP1(std::vector<std::vector<char>>& Map, std::vector<char> moves, std::pair<int, int> playerLocation)
+{
+	std::pair<int, int> NextFreeLocation, NextMove;
+	int barrels = 0;
+
+	for (int i = 0; i < moves.size(); i++)
+	{
+		switch (moves[i])
+		{
+		case '^':
+			NextMove = std::pair<int, int>(-1, 0);
+			break;
+		case '>':
+			NextMove = std::pair<int, int>(0, 1);
+			break;
+		case '<':
+			NextMove = std::pair<int, int>(0, -1);
+			break;
+		case 'v':
+			NextMove = std::pair<int, int>(1, 0);
+			break;
+		default:
+			std::cout << "How did '" << moves[i] << "' get here!!!!????";
+			return;
+			break;
+		}
+		NextFreeLocation = GetNextFreeLocation(Map, playerLocation, NextMove, barrels);
+		int thingToMove = barrels + 1; // add player
+		std::pair<int, int> NewPlayerLocation;
+		// -1,-1 means nothing to do
+		if (NextFreeLocation != std::pair<int, int>(-1, -1))
+		{
+			while (NextFreeLocation != playerLocation)
+			{
+				if(thingToMove > 0)
+				{
+					if (barrels > 0)
+					{
+						Map[NextFreeLocation.first][NextFreeLocation.second] = 'O';
+						barrels--;
+					}
+					else
+					{
+						Map[NextFreeLocation.first][NextFreeLocation.second] = '@';
+						NewPlayerLocation = NextFreeLocation;
+					}
+					thingToMove--;
+				}
+				else
+				{
+					Map[NextFreeLocation.first][NextFreeLocation.second] = '.';
+				}
+				NextFreeLocation = NextFreeLocation - NextMove;
+			}
+			Map[playerLocation.first][playerLocation.second] = '.';
+			playerLocation = NewPlayerLocation;
+		}
+	}
+
+	int FinalGPSScore = GetFinalScore(Map);
+	std::cout << "The sum of all boxes' GPS coordinates is: " << FinalGPSScore << "\n";
+}
+
+std::pair<int, int> GetNextFreeLocation(std::vector<std::vector<char>>& Map, std::pair<int, int> playerLocation, std::pair<int, int> direction, int& Barrels)
+{
+	std::pair<int, int> FreeLocation = playerLocation;
+	bool bFoundFreeSpot = false;
+	Barrels = 0;
+
+	while (!IsOutOfBounds(FreeLocation, std::pair<int,int>(Map.size(), Map[0].size()))
+		&& !bFoundFreeSpot)
+	{
+		FreeLocation = FreeLocation + direction;
+
+		if (Map[FreeLocation.first][FreeLocation.second] == '.')
+		{
+			bFoundFreeSpot = true;
+			break;
+		}
+		else if (Map[FreeLocation.first][FreeLocation.second] == '#')
+		{
+			//Cant move anywhere
+			break;
+		}
+		else if (Map[FreeLocation.first][FreeLocation.second] == 'O')
+		{
+			Barrels++;
+		}
+	}
+
+	if (!bFoundFreeSpot)
+	{
+		FreeLocation = std::pair<int, int>(-1, -1);
+	}
+
+	return FreeLocation;
+}
+
+int GetFinalScore(std::vector<std::vector<char>> Map)
+{
+	int FinalScore = 0;
+	for (int y = 1; y < Map.size() - 1; y++)
+	{
+		for (int x = 1; x < Map[0].size() - 1; x++)
+		{
+			if (Map[y][x] == 'O') 
+			{
+				FinalScore += ((100 * y) + x);
+			}
+		}
+	}
+
+	return FinalScore;
+}
+
 

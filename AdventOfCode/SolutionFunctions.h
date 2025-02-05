@@ -12,6 +12,16 @@
 #include <queue>
 #include "Utility.h"
 
+
+template <typename T, typename U>
+std::pair<T, U> operator+(const std::pair<T, U>& l, const std::pair<T, U>& r) {
+	return { l.first + r.first,l.second + r.second };
+}
+template <typename T, typename U>
+std::pair<T, U> operator-(const std::pair<T, U>& l, const std::pair<T, U>& r) {
+	return { l.first - r.first,l.second - r.second };
+}
+
 void DayOneSolution(std::string input);
 
 void DayTwoSolution(std::string input);
@@ -135,3 +145,8 @@ struct Robot
 void DayFourteenSolution(std::string input);
 void DayFourteenP1(const int seconds, std::vector<Robot> Robots, const int Width, const int Height);
 void DayFourteenP2(const int seconds, std::vector<Robot> Robots, const int Width, const int Height);
+
+void DayFiveteenSolution(std::string input);
+void DayFiveteenP1(std::vector<std::vector<char>>& Map, std::vector<char> moves, std::pair<int, int> playerLocation);
+std::pair<int, int> GetNextFreeLocation(std::vector<std::vector<char>>& Map, std::pair<int, int> playerLocation, std::pair<int, int> direction, int &Barrels);
+int GetFinalScore(std::vector<std::vector<char>> Map);
