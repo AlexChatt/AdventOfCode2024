@@ -1606,8 +1606,9 @@ void DayFourteenP2(const int seconds, std::vector<Robot> Robots, const int Width
 void DayFiveteenSolution(std::string input)
 {
 	std::vector<std::vector<char>> Map;
+	std::vector<std::vector<char>> MapP2;
 	std::vector<char> moves;
-	std::pair<int, int> playerLocation;
+	std::pair<int, int> PLMap1, PLMap2;
 	bool bOnMoveInstructions = false;
 
 	std::ifstream inputfile(input);
@@ -1635,27 +1636,43 @@ void DayFiveteenSolution(std::string input)
 		else
 		{
 			std::vector<char> newLine;
+			std::vector<char> newLineP2;
 			for (int x = 0; x < line.size(); x++)
 			{
 				if (line[x] == '@')
 				{
-					playerLocation = std::pair<int, int>(Map.size(), x);
+					PLMap1 = std::pair<int, int>(Map.size(), newLine.size());
+					PLMap2 = std::pair<int, int>(MapP2.size(), newLineP2.size());
+					newLineP2.push_back(line[x]);
+					newLineP2.push_back('.');
+				}
+				else if (line[x] == 'O')
+				{
+					newLineP2.push_back('[');
+					newLineP2.push_back(']');
+				}
+				else
+				{
+					newLineP2.push_back(line[x]);
+					newLineP2.push_back(line[x]);
 				}
 				newLine.push_back(line[x]);
 			}
 			Map.push_back(newLine);
+			MapP2.push_back(newLineP2);
 		}
 	}
 	inputfile.close();
 
-	DayFiveteenP1(Map, moves, playerLocation);
-
+	//DayFiveteenSolve(Map, moves, PLMap1, false);
+	DayFiveteenSolve(MapP2, moves, PLMap2, true);
 }
 
-void DayFiveteenP1(std::vector<std::vector<char>>& Map, std::vector<char> moves, std::pair<int, int> playerLocation)
+
+void DayFiveteenSolve(std::vector<std::vector<char>>& Map, std::vector<char> moves, std::pair<int, int> playerLocation, bool bAreBoxesWide)
 {
 	std::pair<int, int> NextFreeLocation, NextMove;
-	int barrels = 0;
+	bool StartBarrel = false;
 
 	for (int i = 0; i < moves.size(); i++)
 	{
@@ -1678,48 +1695,157 @@ void DayFiveteenP1(std::vector<std::vector<char>>& Map, std::vector<char> moves,
 			return;
 			break;
 		}
-		NextFreeLocation = GetNextFreeLocation(Map, playerLocation, NextMove, barrels);
-		int thingToMove = barrels + 1; // add player
-		std::pair<int, int> NewPlayerLocation;
-		// -1,-1 means nothing to do
-		if (NextFreeLocation != std::pair<int, int>(-1, -1))
+
+		if (!bAreBoxesWide || NextMove.second != 0)
 		{
-			while (NextFreeLocation != playerLocation)
-			{
-				if(thingToMove > 0)
-				{
-					if (barrels > 0)
-					{
-						Map[NextFreeLocation.first][NextFreeLocation.second] = 'O';
-						barrels--;
-					}
-					else
-					{
-						Map[NextFreeLocation.first][NextFreeLocation.second] = '@';
-						NewPlayerLocation = NextFreeLocation;
-					}
-					thingToMove--;
-				}
-				else
-				{
-					Map[NextFreeLocation.first][NextFreeLocation.second] = '.';
-				}
-				NextFreeLocation = NextFreeLocation - NextMove;
-			}
-			Map[playerLocation.first][playerLocation.second] = '.';
-			playerLocation = NewPlayerLocation;
+			NormalPlayerTravers(Map, playerLocation, NextMove);
+		}
+		else
+		{
+			StackPlayerTravers(Map, playerLocation, NextMove);
 		}
 	}
 
-	int FinalGPSScore = GetFinalScore(Map);
-	std::cout << "The sum of all boxes' GPS coordinates is: " << FinalGPSScore << "\n";
+	PrintMap(Map, false);
+	std::cout << "The sum of all boxes' GPS coordinates is: " << GetFinalScore(Map) << "\n";
 }
 
-std::pair<int, int> GetNextFreeLocation(std::vector<std::vector<char>>& Map, std::pair<int, int> playerLocation, std::pair<int, int> direction, int& Barrels)
+void NormalPlayerTravers(std::vector<std::vector<char>>& Map, std::pair<int, int> &playerLocation, std::pair<int, int> move)
+{
+	std::vector<MapObjectInfo> barrels;
+	std::pair<int, int> NewPlayerLocation, NextFreeLocation;
+	int thingToMove = 0;
+
+	NextFreeLocation = GetNextFreeLocation(Map, playerLocation, move, barrels);
+	thingToMove = barrels.size() + 1; // add player
+
+	// -1,-1 means nothing to do
+	if (NextFreeLocation != std::pair<int, int>(-1, -1))
+	{
+		while (NextFreeLocation != playerLocation)
+		{
+			if (thingToMove > 0)
+			{
+				if (barrels.size() > 0)
+				{
+					if (barrels[barrels.size() - 1].FirstIconSaw == 'O')
+					{
+						Map[NextFreeLocation.first][NextFreeLocation.second] = 'O';
+						barrels.pop_back();
+					}
+					else
+					{
+						if (move.second == -1)
+						{
+							Map[NextFreeLocation.first][NextFreeLocation.second] = '[';
+							NextFreeLocation = NextFreeLocation - move;
+							Map[NextFreeLocation.first][NextFreeLocation.second] = ']';
+						}
+						else 
+						{
+							Map[NextFreeLocation.first][NextFreeLocation.second] = ']';
+							NextFreeLocation = NextFreeLocation - move;
+							Map[NextFreeLocation.first][NextFreeLocation.second] = '[';
+						}
+						barrels.pop_back();
+					}
+				}
+				else
+				{
+					Map[NextFreeLocation.first][NextFreeLocation.second] = '@';
+					NewPlayerLocation = NextFreeLocation;
+				}
+				thingToMove--;
+			}
+			else
+			{
+				Map[NextFreeLocation.first][NextFreeLocation.second] = '.';
+			}
+			NextFreeLocation = NextFreeLocation - move;
+		}
+		Map[playerLocation.first][playerLocation.second] = '.';
+		playerLocation = NewPlayerLocation;
+	}
+
+}
+
+void StackPlayerTravers(std::vector<std::vector<char>>& Map, std::pair<int, int>& playerLocation, std::pair<int, int> move)
+{
+	std::pair<int, int> ObjectLocation, NewLocation;
+	std::stack<MapObjectInfo> ObjectsToMove;
+	MapObjectInfo currentObject;
+	std::vector<std::vector<char>> MapCopy = Map;
+	ObjectsToMove.push(MapObjectInfo(Map[playerLocation.first][playerLocation.second], playerLocation, false));
+
+	while (ObjectsToMove.size() > 0)
+	{
+		currentObject = ObjectsToMove.top();
+		ObjectLocation = currentObject.Postion;
+		NewLocation = ObjectLocation + move;
+
+		if (Map[NewLocation.first][NewLocation.second] == '#') // Hit a wall, wont be able to move 
+		{
+			Map = MapCopy;
+			break;
+		}
+
+		if (!currentObject.bWideObject) // for the Player
+		{
+			if (Map[NewLocation.first][NewLocation.second] == '.')
+			{
+				ObjectsToMove.pop();
+				Map[NewLocation.first][NewLocation.second] = currentObject.FirstIconSaw;
+				Map[playerLocation.first][playerLocation.second] = '.';
+				playerLocation = NewLocation;
+			}
+			else
+			{
+				if (Map[NewLocation.first][NewLocation.second] == ']')
+				{
+					NewLocation.second -= 1;
+				}
+				MapObjectInfo NewObject = MapObjectInfo(Map[NewLocation.first][NewLocation.second], NewLocation, true);
+				ObjectsToMove.push(NewObject);
+			}
+		}
+		else
+		{
+			if(Map[NewLocation.first][NewLocation.second+1] == '#') // Hit a wall, wont be able to move 
+			{
+				Map = MapCopy;
+				break;
+			}
+			else if(Map[NewLocation.first][NewLocation.second] == '.' && 
+				Map[NewLocation.first][NewLocation.second + 1] == '.')
+			{
+				ObjectsToMove.pop();
+				Map[NewLocation.first][NewLocation.second] = '[';
+				Map[NewLocation.first][NewLocation.second + 1] = ']';
+				Map[ObjectLocation.first][ObjectLocation.second] = '.';
+				Map[ObjectLocation.first][ObjectLocation.second+1] = '.';
+			}
+			else // we have hit another box, add it to the stack
+			{
+				if (Map[NewLocation.first][NewLocation.second] == ']')
+				{
+					NewLocation.second -= 1;
+				}
+				else if (Map[NewLocation.first][NewLocation.second] == '.')
+				{
+					NewLocation.second += 1;
+				}
+				MapObjectInfo NewObject = MapObjectInfo(Map[NewLocation.first][NewLocation.second], NewLocation, true);
+				ObjectsToMove.push(NewObject);
+			}
+		}
+	}
+}
+
+std::pair<int, int> GetNextFreeLocation(std::vector<std::vector<char>>& Map, std::pair<int, int> playerLocation, std::pair<int, int> direction, std::vector<MapObjectInfo>& Barrels)
 {
 	std::pair<int, int> FreeLocation = playerLocation;
 	bool bFoundFreeSpot = false;
-	Barrels = 0;
+	Barrels.clear();
 
 	while (!IsOutOfBounds(FreeLocation, std::pair<int,int>(Map.size(), Map[0].size()))
 		&& !bFoundFreeSpot)
@@ -1738,7 +1864,26 @@ std::pair<int, int> GetNextFreeLocation(std::vector<std::vector<char>>& Map, std
 		}
 		else if (Map[FreeLocation.first][FreeLocation.second] == 'O')
 		{
-			Barrels++;
+			Barrels.push_back(MapObjectInfo('O', FreeLocation, false));
+		}
+		else if (Map[FreeLocation.first][FreeLocation.second] == '[' ||
+			Map[FreeLocation.first][FreeLocation.second] == ']')
+		{
+			if (direction.first != 0)
+			{
+				Barrels.push_back(MapObjectInfo(Map[FreeLocation.first][FreeLocation.second], FreeLocation, true));
+			}
+			else
+			{
+				if (direction.second == 1 && Map[FreeLocation.first][FreeLocation.second] == '[')
+				{
+					Barrels.push_back(MapObjectInfo('[', FreeLocation, true));
+				}
+				else if (direction.second == -1 && Map[FreeLocation.first][FreeLocation.second] == ']')
+				{
+					Barrels.push_back(MapObjectInfo(']', FreeLocation, true));
+				}
+			}
 		}
 	}
 
@@ -1760,6 +1905,12 @@ int GetFinalScore(std::vector<std::vector<char>> Map)
 			if (Map[y][x] == 'O') 
 			{
 				FinalScore += ((100 * y) + x);
+			}
+
+			if  (Map[y][x] == '[')
+			{
+				FinalScore += ((100 * y) + x);
+				x++; // Skip ]
 			}
 		}
 	}

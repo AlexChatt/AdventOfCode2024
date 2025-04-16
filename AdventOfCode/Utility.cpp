@@ -72,4 +72,3 @@ bool IsOutOfBounds(std::pair<int, int> location, std::pair<int, int> maxSize)
 
 	return false;
 }
-

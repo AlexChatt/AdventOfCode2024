@@ -10,8 +10,8 @@
 #include <sstream>
 #include <regex>
 #include <queue>
+#include <stack>
 #include "Utility.h"
-
 
 template <typename T, typename U>
 std::pair<T, U> operator+(const std::pair<T, U>& l, const std::pair<T, U>& r) {
@@ -146,7 +146,26 @@ void DayFourteenSolution(std::string input);
 void DayFourteenP1(const int seconds, std::vector<Robot> Robots, const int Width, const int Height);
 void DayFourteenP2(const int seconds, std::vector<Robot> Robots, const int Width, const int Height);
 
+struct MapObjectInfo
+{
+	char FirstIconSaw;
+	bool bWideObject;
+	std::pair<int, int> Postion;
+
+	MapObjectInfo() { }
+	MapObjectInfo(char FIcon, std::pair<int, int> Pos, bool bIsWideObject)
+	{
+		FirstIconSaw = FIcon;
+		Postion = Pos;
+		bWideObject = bIsWideObject;
+	}
+};
+
 void DayFiveteenSolution(std::string input);
-void DayFiveteenP1(std::vector<std::vector<char>>& Map, std::vector<char> moves, std::pair<int, int> playerLocation);
-std::pair<int, int> GetNextFreeLocation(std::vector<std::vector<char>>& Map, std::pair<int, int> playerLocation, std::pair<int, int> direction, int &Barrels);
+void DayFiveteenSolve(std::vector<std::vector<char>>& Map, std::vector<char> moves, std::pair<int, int> playerLocation, bool bAreBoxesWide);
+
+void NormalPlayerTravers(std::vector<std::vector<char>>& Map, std::pair<int, int>& playerLocation, std::pair<int, int> move);
+void StackPlayerTravers(std::vector<std::vector<char>>& Map, std::pair<int, int>& playerLocation, std::pair<int, int> move);
+
+std::pair<int, int> GetNextFreeLocation(std::vector<std::vector<char>>& Map, std::pair<int, int> playerLocation, std::pair<int, int> direction, std::vector<MapObjectInfo> &Barrels);
 int GetFinalScore(std::vector<std::vector<char>> Map);
