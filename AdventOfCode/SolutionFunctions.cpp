@@ -1918,4 +1918,185 @@ int GetFinalScore(std::vector<std::vector<char>> Map)
 	return FinalScore;
 }
 
+void DaySixteenSolution(std::string input)
+{
+	std::vector<std::vector<std::shared_ptr<Tile>>> MyMap;
+	std::shared_ptr<Tile> StartTile, EndTile = NULL;
+
+	std::ifstream inputfile(input);
+	if (!inputfile)
+	{
+		std::cout << "Can not open input file" << input << "\n";
+		return;
+	}
+
+	std::string line;
+	int x = 0, y = 0;
+	while (std::getline(inputfile, line))
+	{
+		std::vector<std::shared_ptr<Tile>> TileLine;
+		x = 0;
+		for (auto letter : line)
+		{
+			std::shared_ptr<Tile> NewTile = std::make_shared<Tile>(letter,std::pair<int,int>(y,x));
+			TileLine.push_back(NewTile);
+			if(letter == 'S')
+			{
+				StartTile = NewTile;
+			}
+			else if (letter == 'E')
+			{
+				EndTile = NewTile;
+			}
+			x++;
+		}
+		MyMap.push_back(TileLine);
+		y++;
+	}
+	inputfile.close();
+
+	GetPathToEnd(MyMap, StartTile, EndTile);
+
+}
+
+void GetPathToEnd(std::vector<std::vector<std::shared_ptr<Tile>>> MyMap, std::shared_ptr<Tile> StartTile, std::shared_ptr<Tile> EndTile)
+{
+	std::set <std::shared_ptr<Tile>> OpenList, ClosedList;
+	std::shared_ptr<Tile> Current = StartTile;
+
+	OpenList.insert(StartTile);
+
+	while (OpenList.size() > 0)
+	{
+		for (auto &Node : OpenList)
+		{
+			if (Current == NULL || Node->F < Current->F)
+			{
+				Current = Node;
+			}
+		}
+
+		OpenList.erase(Current);
+		ClosedList.insert(Current);
+		Current->bIsInClosedList = true;
+
+		if (Current == EndTile)
+		{
+			// Found Our Path
+			break;
+		}
+
+		std::vector <std::shared_ptr<Tile>> AvaliableNeigbours;
+		GetAvaliableNeigbours(Current, MyMap, AvaliableNeigbours);
+
+		for (auto& Node : AvaliableNeigbours)
+		{
+			int Cost = Node->cost;
+			if (Current->Parent != NULL) 
+			{
+				std::pair<int, int> PreviousDir = Current->Postion - Current->Parent->Postion;
+				std::pair<int, int> dir = Node->Postion - Current->Postion;
+				if (PreviousDir != dir)
+				{
+					Cost *= 1000;
+				}
+			}
+
+			Node->G = Current->G + Cost;
+			Node->H = std::sqrt(((Node->Postion.first - EndTile->Postion.first) ^ 2) + ((Node->Postion.second - EndTile->Postion.second) ^ 2));
+			Node->F = Node->G + Node->H;
+			Node->Parent = Current;
+
+			if (OpenList.find(Node) == OpenList.end())
+			{
+				OpenList.insert(Node);
+			}
+		}
+		Current = NULL;
+	}
+
+	int TileCount = 1, Turns = 0;
+	std::pair<int, int> dir;
+	if (Current->Parent != NULL)
+	{
+		dir = Current->Parent->Postion - Current->Postion;
+	}
+
+	while (Current != StartTile && Current != NULL)
+	{
+		if (Current->Icon == '.')
+		{
+			Current->Icon = '+';
+			TileCount++;
+		}
+
+		if (Current->Parent != NULL)
+		{
+			if (dir != Current->Parent->Postion - Current->Postion)
+			{
+				Turns++;
+				dir = Current->Parent->Postion - Current->Postion;
+			}
+			else if (Current->Parent->Icon == 'S' && dir != std::pair<int, int>(0, -1))
+			{
+				Turns++;
+			}
+			Current = Current->Parent;
+		}
+		else
+		{
+			Current = NULL;
+		}
+	}
+
+	
+	/*for (int i = 0; i < MyMap.size(); i++)
+	{
+		for (int j = 0; j < MyMap[i].size(); j++)
+		{
+			std::cout << MyMap[i][j]->Icon;
+		}
+		std::cout << "\n";
+	}*/
+
+	std::cout << "Path cost is: " << TileCount + (Turns * 1000) << std::endl;
+}
+
+void GetAvaliableNeigbours(std::shared_ptr<Tile> MyTile, std::vector<std::vector<std::shared_ptr<Tile>>> Map, std::vector<std::shared_ptr<Tile>> &PathHolder)
+{
+	std::vector<std::shared_ptr<Tile>> ListToCheck;
+	std::pair<int, int> Postion, MapScale;
+
+	if (Map.size() == 0) { return; }
+
+	Postion = MyTile->Postion;
+	MapScale = std::pair<int, int>(Map.size(), Map[0].size());
+
+	if (!IsOutOfBounds(std::pair<int, int>(Postion.first + 1, Postion.second), MapScale))
+	{
+		ListToCheck.push_back(Map[Postion.first + 1][Postion.second]);
+	}
+	if (!IsOutOfBounds(std::pair<int, int>(Postion.first - 1, Postion.second), MapScale))
+	{
+		ListToCheck.push_back(Map[Postion.first - 1][Postion.second]);
+	}
+	if (!IsOutOfBounds(std::pair<int, int>(Postion.first, Postion.second + 1), MapScale))
+	{
+		ListToCheck.push_back(Map[Postion.first][Postion.second + 1]);
+	}
+	if (!IsOutOfBounds(std::pair<int, int>(Postion.first, Postion.second - 1), MapScale))
+	{
+		ListToCheck.push_back(Map[Postion.first][Postion.second - 1]);
+	}
+
+	for (auto& Current : ListToCheck)
+	{
+		if (Current->bIsAvaliable &&
+			!Current->bIsInClosedList)
+		{
+			PathHolder.push_back(Current);
+		}
+	}
+}
+
 

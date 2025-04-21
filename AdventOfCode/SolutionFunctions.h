@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <unordered_set>
 #include <map>
 #include <unordered_map>
 #include <string>
@@ -169,3 +170,41 @@ void StackPlayerTravers(std::vector<std::vector<char>>& Map, std::pair<int, int>
 
 std::pair<int, int> GetNextFreeLocation(std::vector<std::vector<char>>& Map, std::pair<int, int> playerLocation, std::pair<int, int> direction, std::vector<MapObjectInfo> &Barrels);
 int GetFinalScore(std::vector<std::vector<char>> Map);
+
+
+struct Tile
+{
+	char Icon;
+	bool bIsAvaliable, bIsInClosedList;
+	std::pair<int, int> Postion;
+	std::shared_ptr<Tile> Parent;
+	int F, G, H, cost;
+
+	Tile() { }
+	Tile(char MyIcon, std::pair<int, int> Pos)
+	{
+		Icon = MyIcon;
+		Postion = Pos;
+		bIsAvaliable = true;
+		if (MyIcon == '#')
+		{
+			bIsAvaliable = false;
+		}
+		F = G = H = 0;
+		cost = 10;
+		bIsInClosedList = false;
+		Parent = NULL;
+	}
+
+	void reset()
+	{
+		G = H = F = 0;
+		cost = 10;
+		bIsInClosedList = false;
+		Parent = NULL;
+	}
+};
+
+void DaySixteenSolution(std::string input);
+void GetPathToEnd(std::vector<std::vector<std::shared_ptr<Tile>>> MyMap, std::shared_ptr<Tile> StartTile, std::shared_ptr<Tile> EndTile);
+void GetAvaliableNeigbours(std::shared_ptr<Tile> MyTile, std::vector<std::vector<std::shared_ptr<Tile>>> Map, std::vector<std::shared_ptr<Tile>> &PathHolder);
